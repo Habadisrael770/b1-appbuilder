@@ -1,5 +1,20 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1763496135359,
+      "tag": "0000_daily_blade",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1763496424064,
+      "tag": "0001_flippant_cassandra_nova",
+      "breakpoints": true
+    }
+  ]
 }

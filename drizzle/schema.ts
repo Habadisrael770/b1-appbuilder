@@ -25,4 +25,62 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * App conversion records
+ */
+export const apps = mysqlTable("apps", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  appName: varchar("appName", { length: 255 }).notNull(),
+  websiteUrl: varchar("websiteUrl", { length: 2048 }).notNull(),
+  platform: mysqlEnum("platform", ["IOS", "ANDROID", "BOTH"]).default("BOTH").notNull(),
+  iconUrl: text("iconUrl"),
+  splashScreenUrl: text("splashScreenUrl"),
+  primaryColor: varchar("primaryColor", { length: 7 }).default("#00A86B").notNull(),
+  secondaryColor: varchar("secondaryColor", { length: 7 }),
+  status: mysqlEnum("status", ["PROCESSING", "COMPLETED", "FAILED"]).default("PROCESSING").notNull(),
+  iosPackageUrl: text("iosPackageUrl"),
+  androidPackageUrl: text("androidPackageUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type App = typeof apps.$inferSelect;
+export type InsertApp = typeof apps.$inferInsert;
+
+/**
+ * Subscription records
+ */
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }).unique(),
+  plan: mysqlEnum("plan", ["FREE", "BASIC", "PRO", "ENTERPRISE"]).default("FREE").notNull(),
+  status: varchar("status", { length: 50 }).notNull(),
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  cancelAtPeriodEnd: int("cancelAtPeriodEnd").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+/**
+ * Payment records
+ */
+export const payments = mysqlTable("payments", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripePaymentId: varchar("stripePaymentId", { length: 255 }).unique(),
+  amount: int("amount").notNull(),
+  currency: varchar("currency", { length: 3 }).default("USD").notNull(),
+  status: mysqlEnum("status", ["SUCCEEDED", "PENDING", "FAILED"]).notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 50 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Payment = typeof payments.$inferSelect;
+export type InsertPayment = typeof payments.$inferInsert;

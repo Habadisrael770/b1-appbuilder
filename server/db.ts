@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, apps, subscriptions, payments, InsertApp, InsertSubscription, InsertPayment } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,93 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// App queries
+export async function getUserApps(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(apps).where(eq(apps.userId, userId));
+}
+
+export async function createApp(app: InsertApp) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(apps).values(app);
+}
+
+export async function getAppById(appId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(apps).where(and(eq(apps.id, appId), eq(apps.userId, userId))).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateApp(appId: number, userId: number, updates: Partial<InsertApp>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(apps).set(updates).where(and(eq(apps.id, appId), eq(apps.userId, userId)));
+}
+
+export async function deleteApp(appId: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.delete(apps).where(and(eq(apps.id, appId), eq(apps.userId, userId)));
+}
+
+// Subscription queries
+export async function getUserSubscription(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createSubscription(subscription: InsertSubscription) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(subscriptions).values(subscription);
+}
+
+export async function updateSubscription(userId: number, updates: Partial<InsertSubscription>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.update(subscriptions).set(updates).where(eq(subscriptions.userId, userId));
+}
+
+// Payment queries
+export async function getUserPayments(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(payments).where(eq(payments.userId, userId));
+}
+
+export async function createPayment(payment: InsertPayment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.insert(payments).values(payment);
+}
+
+export async function getPaymentByStripeId(stripePaymentId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(payments).where(eq(payments.stripePaymentId, stripePaymentId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Admin queries
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(users);
+}
+
+export async function getAllApps() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(apps);
+}
+
+export async function getAllPayments() {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(payments);
+}
