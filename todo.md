@@ -45,13 +45,13 @@
 - [ ] Test payment flow with test cards
 
 ## Phase 5: User Dashboard
-- [ ] Create Dashboard layout with sidebar navigation
-- [ ] Overview tab (welcome, stats cards, recent activity)
-- [ ] My Apps tab (table with app list, status, actions)
-- [ ] Billing tab (current plan, payment method, billing history)
-- [ ] Settings tab (profile, password change, notifications, delete account)
-- [ ] Implement app download functionality
-- [ ] Add edit/delete app actions
+- [x] Create Dashboard layout with sidebar navigation
+- [x] Overview tab (welcome, stats cards, recent activity)
+- [x] My Apps tab (table with app list, status, actions)
+- [x] Billing tab (current plan, payment method, billing history)
+- [x] Settings tab (profile, password change, notifications, delete account)
+- [x] Implement app download functionality
+- [x] Add edit/delete app actions
 
 ## Phase 6: Admin Dashboard
 - [ ] Create Admin layout with sidebar navigation
