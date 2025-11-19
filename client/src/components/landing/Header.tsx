@@ -22,10 +22,10 @@ export function Header() {
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#00A86B] rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">B1</span>
           </div>
-          <span className="font-bold text-lg text-gray-900">{APP_TITLE}</span>
+          <span className="font-bold text-lg text-[#00A86B]">{APP_TITLE}</span>
         </div>
 
         {/* Desktop Navigation */}
@@ -34,7 +34,7 @@ export function Header() {
             <a
               key={link.label}
               href={link.href}
-              className="text-gray-600 hover:text-primary transition-colors font-medium"
+              className="text-gray-600 hover:text-[#00A86B] transition-colors font-medium"
             >
               {link.label}
             </a>
@@ -45,7 +45,7 @@ export function Header() {
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated && <NotificationCenter />}
           <Button
-            className="bg-primary hover:bg-primary-dark text-white font-semibold"
+            className="bg-[#00A86B] hover:bg-[#008556] text-white font-semibold transition-colors"
             onClick={() => (window.location.href = getLoginUrl())}
           >
             {isAuthenticated ? "Dashboard" : "Get Started"}
@@ -73,14 +73,14 @@ export function Header() {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-gray-600 hover:text-primary transition-colors font-medium"
+                className="text-gray-600 hover:text-[#00A86B] transition-colors font-medium"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {link.label}
               </a>
             ))}
             <Button
-              className="bg-primary hover:bg-primary-dark text-white font-semibold w-full"
+              className="bg-[#00A86B] hover:bg-[#008556] text-white font-semibold w-full transition-colors"
               onClick={() => {
                 setIsMenuOpen(false);
                 window.location.href = getLoginUrl();

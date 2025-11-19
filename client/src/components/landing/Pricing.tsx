@@ -69,7 +69,7 @@ export function Pricing() {
 
   return (
     <section id="pricing" className="py-20 md:py-32 bg-white">
-      <div className="container">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Choose Your Plan
@@ -86,7 +86,7 @@ export function Pricing() {
             <button
               onClick={() => setIsAnnual(!isAnnual)}
               className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                isAnnual ? "bg-primary" : "bg-gray-300"
+                isAnnual ? "bg-[#00A86B]" : "bg-gray-300"
               }`}
             >
               <span
@@ -99,7 +99,7 @@ export function Pricing() {
               Annual
             </span>
             {isAnnual && (
-              <Badge className="bg-primary text-white ml-2">Save 20%</Badge>
+              <Badge className="bg-[#00A86B] text-white ml-2">Save 20%</Badge>
             )}
           </div>
         </div>
@@ -110,17 +110,17 @@ export function Pricing() {
             <Card
               key={plan.name}
               className={`relative border-0 shadow-lg transition-transform hover:scale-105 ${
-                plan.popular ? "md:scale-105 ring-2 ring-primary" : ""
+                plan.popular ? "md:scale-105 ring-2 ring-[#00A86B]" : ""
               }`}
             >
               {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-white">
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#00A86B] text-white">
                   Most Popular
                 </Badge>
               )}
 
               <CardHeader>
-                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <CardTitle className="text-2xl text-gray-900">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
                 <div className="mt-4">
                   <div className="flex items-baseline gap-1">
@@ -139,7 +139,7 @@ export function Pricing() {
                 <div className="space-y-3">
                   {plan.features.map((feature) => (
                     <div key={feature} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <Check className="w-5 h-5 text-[#00A86B] flex-shrink-0 mt-0.5" />
                       <span className="text-gray-700">{feature}</span>
                     </div>
                   ))}
@@ -159,11 +159,10 @@ export function Pricing() {
 
                 {/* CTA Button */}
                 <Button
-                  variant={plan.variant}
-                  className={`w-full font-semibold py-2 ${
+                  className={`w-full font-semibold py-2 transition-colors ${
                     plan.variant === "default"
-                      ? "bg-primary hover:bg-primary-dark text-white"
-                      : "border-primary text-primary hover:bg-primary-50"
+                      ? "bg-[#00A86B] hover:bg-[#008556] text-white"
+                      : "border-2 border-[#00A86B] text-[#00A86B] hover:bg-[#E8F5E9]"
                   }`}
                   onClick={() => (window.location.href = getLoginUrl())}
                 >

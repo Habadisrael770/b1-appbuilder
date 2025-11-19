@@ -43,7 +43,9 @@
 }
 
 :root {
-  --primary: oklch(0.55 0.15 142.5);
+  --primary: #00A86B;
+  --primary-dark: #008556;
+  --primary-light: #00C47D;
   --primary-foreground: oklch(1 0 0);
   --sidebar-primary: oklch(0.50 0.14 142.5);
   --sidebar-primary-foreground: oklch(1 0 0);
@@ -134,6 +136,27 @@
 }
 
 @layer components {
+  /* B1 Primary Color Utilities */
+  .btn-primary {
+    @apply bg-[#00A86B] hover:bg-[#008556] text-white transition-colors;
+  }
+
+  .text-primary {
+    @apply text-[#00A86B];
+  }
+
+  .border-primary {
+    @apply border-[#00A86B];
+  }
+
+  .bg-primary-light {
+    @apply bg-[#E8F5E9];
+  }
+
+  .ring-primary {
+    @apply ring-[#00A86B];
+  }
+
   /**
    * Custom container utility that centers content and adds responsive padding.
    *

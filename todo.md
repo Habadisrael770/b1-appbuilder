@@ -1,35 +1,35 @@
 # B1 AppBuilder - Project TODO
 
 ## Phase 1: Landing Page & Design System
-- [ ] Configure Tailwind CSS with B1 green color scheme (#00A86B, #008556, #00C47D)
-- [ ] Create Header component (sticky, logo, nav, CTA button)
-- [ ] Create Hero section (H1, subtitle, URL input, trust badges, phone mockup)
-- [ ] Create Features section (4 feature cards with icons)
-- [ ] Create How It Works section (3 steps with numbered badges)
-- [ ] Create Pricing section (3 tiers with toggle for monthly/annual)
-- [ ] Create FAQ section (accordion with 8+ Q&A pairs)
-- [ ] Create Footer (4 columns, social icons, copyright)
-- [ ] Make landing page fully responsive (mobile-first)
-- [ ] Implement smooth scrolling and animations
+- [x] Configure Tailwind CSS with B1 green color scheme (#00A86B, #008556, #00C47D)
+- [x] Create Header component (sticky, logo, nav, CTA button)
+- [x] Create Hero section (H1, subtitle, URL input, trust badges, phone mockup)
+- [x] Create Features section (4 feature cards with icons)
+- [x] Create How It Works section (3 steps with numbered badges)
+- [x] Create Pricing section (3 tiers with toggle for monthly/annual)
+- [x] Create FAQ section (accordion with 8+ Q&A pairs)
+- [x] Create Footer (4 columns, social icons, copyright)
+- [x] Make landing page fully responsive (mobile-first)
+- [x] Implement smooth scrolling and animations
 
 ## Phase 2: Authentication & Database
-- [ ] Set up Prisma schema with User, App, Subscription, Payment models
-- [ ] Configure database connection
-- [ ] Implement NextAuth.js integration
-- [ ] Create Login page (email/password, social login)
-- [ ] Create Register page (name, email, password, terms checkbox)
+- [x] Set up Prisma schema with User, App, Subscription, Payment models
+- [x] Configure database connection
+- [x] Implement NextAuth.js integration (Manus OAuth)
+- [x] Create Login page (email/password, social login)
+- [x] Create Register page (name, email, password, terms checkbox)
 - [ ] Create Forgot Password page
 - [ ] Create Reset Password page
 - [ ] Add password validation and error handling
 - [ ] Test auth flow end-to-end
 
 ## Phase 3: Conversion Flow
-- [ ] Create multi-step wizard component with state management
-- [ ] Step 1: URL Entry (input validation, website metadata fetch)
-- [ ] Step 2: Platform Selection (iOS/Android/Both radio buttons)
-- [ ] Step 3: Customization (app name, icon upload, splash screen, color picker)
-- [ ] Step 4: Preview (iPhone & Android mockups)
-- [ ] Step 5: Plan Selection (pricing cards)
+- [x] Create multi-step wizard component with state management
+- [x] Step 1: URL Entry (input validation, website metadata fetch)
+- [x] Step 2: Platform Selection (iOS/Android/Both radio buttons)
+- [x] Step 3: Customization (app name, icon upload, splash screen, color picker)
+- [x] Step 4: Preview (iPhone & Android mockups)
+- [x] Step 5: Plan Selection (pricing cards)
 - [ ] Step 6: Checkout (Stripe/PayPal integration)
 - [ ] Step 7: Processing (progress bar, status messages)
 - [ ] Step 8: Download (success message, download buttons, redirect to dashboard)
@@ -67,8 +67,8 @@
 - [ ] Configure chat widget colors to match B1 green
 - [ ] Add chat widget to layout
 - [ ] Test chat functionality
-- [ ] Add loading states and error handling throughout
-- [ ] Implement toast notifications for user feedback
+- [x] Add loading states and error handling throughout
+- [x] Implement toast notifications for user feedback
 - [ ] Add email templates for notifications
 
 ## Phase 8: Testing & Deployment
@@ -83,5 +83,12 @@
 - [ ] Set up Stripe and PayPal webhooks
 - [ ] Perform final QA testing
 
-## Completed Tasks
-(None yet)
+## QA Fixes Completed
+- [x] Fix color scheme - all B1 green colors (#00A86B, #008556, #00C47D)
+- [x] Fix Header component styling and colors
+- [x] Fix Hero section with correct colors and layout
+- [x] Fix Features section with green icons and backgrounds
+- [x] Fix Pricing section with green buttons and badges
+- [x] Add video section to landing page
+- [x] Implement notification system (Toast, NotificationCenter, NotificationSettings)
+- [x] Integrate NotificationCenter into Header
