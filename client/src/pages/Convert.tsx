@@ -4,6 +4,9 @@ import { StepTwo } from "@/components/convert/StepTwo";
 import { StepThree } from "@/components/convert/StepThree";
 import { StepFour } from "@/components/convert/StepFour";
 import { StepFive } from "@/components/convert/StepFive";
+import { StepSix } from "@/components/convert/StepSix";
+import { StepSeven } from "@/components/convert/StepSeven";
+import { StepEight } from "@/components/convert/StepEight";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
@@ -54,6 +57,14 @@ export default function Convert() {
     setCurrentStep(6);
   };
 
+  const handleStepSix = () => {
+    setCurrentStep(7);
+  };
+
+  const handleStepSeven = () => {
+    setCurrentStep(8);
+  };
+
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep((prev) => (prev - 1) as ConversionStep);
@@ -86,7 +97,7 @@ export default function Convert() {
                 <div
                   key={i + 1}
                   className={`flex-1 h-1 rounded-full transition-colors ${
-                    i + 1 <= currentStep ? "bg-primary" : "bg-gray-200"
+                    i + 1 <= currentStep ? "bg-[#00A86B]" : "bg-gray-200"
                   }`}
                 />
               ))}
@@ -121,18 +132,19 @@ export default function Convert() {
           {currentStep === 5 && (
             <StepFive onNext={handleStepFive} onBack={handleBack} />
           )}
-          {currentStep >= 6 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Processing Your App
-              </h2>
-              <p className="text-gray-600">
-                We're converting your website to a mobile app. This may take a few minutes...
-              </p>
-            </div>
+          {currentStep === 6 && conversionData.plan && (
+            <StepSix
+              plan={conversionData.plan}
+              onNext={handleStepSix}
+              onBack={handleBack}
+            />
+          )}
+          {currentStep === 7 && <StepSeven onNext={handleStepSeven} />}
+          {currentStep === 8 && conversionData.appName && (
+            <StepEight
+              appName={conversionData.appName}
+              platform={conversionData.platform || "BOTH"}
+            />
           )}
         </Card>
 
@@ -156,7 +168,7 @@ export default function Convert() {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2 font-semibold text-sm transition-colors ${
                     stepNum <= currentStep
-                      ? "bg-primary text-white"
+                      ? "bg-[#00A86B] text-white"
                       : "bg-gray-200 text-gray-600"
                   }`}
                 >
