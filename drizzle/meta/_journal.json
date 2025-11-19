@@ -15,6 +15,13 @@
       "when": 1763496424064,
       "tag": "0001_flippant_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1763512854505,
+      "tag": "0002_dear_colleen_wing",
+      "breakpoints": true
     }
   ]
 }

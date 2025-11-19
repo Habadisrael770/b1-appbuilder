@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const navLinks = [
     { label: "Home", href: "#home" },
@@ -38,13 +41,14 @@ export function Header() {
           ))}
         </nav>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
+        {/* Notification Center & CTA Button */}
+        <div className="hidden md:flex items-center gap-4">
+          {isAuthenticated && <NotificationCenter />}
           <Button
             className="bg-primary hover:bg-primary-dark text-white font-semibold"
             onClick={() => (window.location.href = getLoginUrl())}
           >
-            Get Started
+            {isAuthenticated ? "Dashboard" : "Get Started"}
           </Button>
         </div>
 

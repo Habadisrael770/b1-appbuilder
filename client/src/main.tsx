@@ -7,6 +7,9 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastContainer } from "./components/notifications/ToastContainer";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +58,12 @@ const trpcClient = trpc.createClient({
 createRoot(document.getElementById("root")!).render(
   <trpc.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ThemeProvider defaultTheme="light">
+        <NotificationProvider>
+          <App />
+          <ToastContainer />
+        </NotificationProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   </trpc.Provider>
 );

@@ -84,3 +84,39 @@ export const payments = mysqlTable("payments", {
 
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = typeof payments.$inferInsert;
+
+/**
+ * Notifications table
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["SUCCESS", "ERROR", "INFO", "WARNING"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isRead: int("isRead").default(0).notNull(),
+  actionUrl: varchar("actionUrl", { length: 2048 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Notification settings table
+ */
+export const notificationSettings = mysqlTable("notificationSettings", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  emailNotifications: int("emailNotifications").default(1).notNull(),
+  pushNotifications: int("pushNotifications").default(1).notNull(),
+  desktopNotifications: int("desktopNotifications").default(1).notNull(),
+  appUpdates: int("appUpdates").default(1).notNull(),
+  paymentAlerts: int("paymentAlerts").default(1).notNull(),
+  promotions: int("promotions").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationSettings = typeof notificationSettings.$inferSelect;
+export type InsertNotificationSettings = typeof notificationSettings.$inferInsert;
