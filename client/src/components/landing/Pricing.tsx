@@ -10,6 +10,23 @@ export function Pricing() {
 
   const plans = [
     {
+      name: "Free Trial",
+      monthlyPrice: 0,
+      description: "14 days to explore Pro features",
+      features: [
+        "5 App Conversions",
+        "iOS & Android",
+        "Advanced Customization",
+        "Push Notifications",
+        "Offline Mode",
+        "Priority Support",
+      ],
+      notIncluded: [],
+      cta: "Start Free Trial",
+      variant: "default" as const,
+      badge: "14 Days Free",
+    },
+    {
       name: "Basic",
       monthlyPrice: 29,
       description: "Perfect for getting started",
@@ -39,7 +56,7 @@ export function Pricing() {
       notIncluded: [],
       cta: "Choose Pro",
       variant: "default" as const,
-      popular: true,
+      popular: false,
     },
     {
       name: "Enterprise",
@@ -122,15 +139,20 @@ export function Pricing() {
               <CardHeader>
                 <CardTitle className="text-2xl text-gray-900">{plan.name}</CardTitle>
                 <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
+                        <div className="mt-4">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-gray-900">
-                      ${getPrice(plan.monthlyPrice)}
+                      {plan.monthlyPrice === 0 ? "Free" : `$${getPrice(plan.monthlyPrice)}`}
                     </span>
-                    <span className="text-gray-600">
-                      {isAnnual ? "/year" : "/month"}
-                    </span>
+                    {plan.monthlyPrice > 0 && (
+                      <span className="text-gray-600">
+                        {isAnnual ? "/year" : "/month"}
+                      </span>
+                    )}
                   </div>
+                  {plan.badge && (
+                    <p className="text-sm text-[#00A86B] font-semibold mt-2">{plan.badge}</p>
+                  )}
                 </div>
               </CardHeader>
 

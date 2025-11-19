@@ -64,6 +64,14 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.lastSignedIn = new Date();
     }
 
+    // Set 14-day trial for new users
+    if (!values.trialEndsAt) {
+      const trialEndDate = new Date();
+      trialEndDate.setDate(trialEndDate.getDate() + 14);
+      values.trialEndsAt = trialEndDate;
+      values.isTrialActive = 1;
+    }
+
     if (Object.keys(updateSet).length === 0) {
       updateSet.lastSignedIn = new Date();
     }

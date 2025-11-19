@@ -99,3 +99,15 @@
 - [x] Fix Step 7 (Processing) - add timeout and auto-advance to Step 8
 - [x] Fix Step 8 (Download) - implement success message and download buttons
 - [x] Test conversion flow end-to-end
+
+
+## Free Trial Feature (14 Days)
+- [x] Update database schema - add trialEndsAt, isTrialActive fields to users table
+- [x] Update user creation - automatically assign 14-day trial to new users
+- [x] Update Dashboard - display trial status and days remaining
+- [x] Update Pricing page - highlight Free Trial as first option
+- [x] Add trial banner/notification to Dashboard
+- [ ] Create trial expiration check logic
+- [ ] Implement automatic billing after trial ends
+- [ ] Send email notification before trial expires
+- [ ] Test free trial flow end-to-end

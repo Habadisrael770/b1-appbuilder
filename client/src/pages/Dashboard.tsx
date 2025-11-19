@@ -144,6 +144,19 @@ export default function Dashboard() {
             {/* Overview Tab */}
             {activeTab === "overview" && (
               <div className="space-y-8">
+                {/* Trial Banner */}
+                <div className="bg-gradient-to-r from-[#00A86B] to-[#008556] text-white rounded-lg p-6 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">🎉 Free Trial Active</h2>
+                      <p className="text-green-100">You have <span className="font-bold">14 days</span> to explore all Pro features for free. No credit card required!</p>
+                    </div>
+                    <Button className="bg-white text-[#00A86B] hover:bg-gray-100 font-bold">
+                      Upgrade Now
+                    </Button>
+                  </div>
+                </div>
+
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user?.name}!</h1>
                   <p className="text-gray-600 mt-2">Here's an overview of your account</p>
@@ -162,8 +175,8 @@ export default function Dashboard() {
                   <Card className="border-0 shadow-sm p-6">
                     <div className="space-y-2">
                       <p className="text-sm text-gray-600 font-medium">Current Plan</p>
-                      <p className="text-2xl font-bold text-[#00A86B]">Free</p>
-                      <p className="text-xs text-gray-500">Upgrade to Pro</p>
+                      <p className="text-2xl font-bold text-[#00A86B]">Free Trial</p>
+                      <p className="text-xs text-gray-500">13 days remaining</p>
                     </div>
                   </Card>
 
