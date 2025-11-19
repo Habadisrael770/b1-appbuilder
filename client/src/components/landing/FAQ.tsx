@@ -30,7 +30,7 @@ export function FAQ() {
     {
       question: "Is there a free trial?",
       answer:
-        "Yes, try our Basic plan free for 14 days. No credit card required. You'll have full access to all features during the trial period.",
+        "Yes, try our Pro plan free for 14 days. No credit card required. You'll have full access to all features during the trial period.",
     },
     {
       question: "What payment methods do you accept?",
@@ -50,29 +50,39 @@ export function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-20 md:py-32 bg-gray-50">
-      <div className="container max-w-3xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+    <section id="faq" className="py-20 md:py-32 lg:py-40 bg-gray-50">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+          <h2 className="text-4xl md:text-5xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
             Frequently Asked Questions
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
             Find answers to common questions about B1 AppBuilder
           </p>
         </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left font-semibold text-gray-900 hover:text-primary">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 text-base">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        {/* FAQ Accordion */}
+        <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={`item-${index}`}
+                className="border-b border-gray-200 last:border-b-0"
+              >
+                <AccordionTrigger className="text-left px-6 md:px-8 py-5 md:py-6 hover:bg-gray-50 transition-colors group">
+                  <span className="text-lg md:text-base font-semibold text-gray-900 group-hover:text-[#00A86B] transition-colors">
+                    {faq.question}
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="px-6 md:px-8 py-4 md:py-5 bg-gray-50 text-gray-600 text-base leading-relaxed">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
       </div>
     </section>
   );
