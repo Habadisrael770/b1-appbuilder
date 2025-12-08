@@ -41,8 +41,9 @@
 - [ ] Set up PayPal integration
 - [ ] Create PayPal button component
 - [ ] Implement PayPal webhook handler
-- [ ] Add payment method selection UI
+- [ ] Add payment method selection UI (optional during trial)
 - [ ] Test payment flow with test cards
+- [ ] Make payment optional - allow "Skip for now" during free trial
 
 ## Phase 5: User Dashboard
 - [x] Create Dashboard layout with sidebar navigation
@@ -138,3 +139,18 @@
 - [ ] Add loading states to all async operations
 - [ ] Add ARIA labels for accessibility
 - [ ] Test in multiple browsers (Chrome, Firefox, Safari, Edge)
+
+## Bug Fix: Payment Flow (Optional Payment During Free Trial)
+- [x] Make payment method optional during free trial
+- [x] Add "Skip for now" button to Step 6 (Checkout)
+- [x] Allow users to add payment method later in Dashboard
+- [x] Update database schema to allow null payment method
+- [x] Test free trial flow without payment
+
+## Enhancement: File Uploads & Downloads
+- [x] Add App Icon upload to Step 3
+- [x] Add Splash Screen upload to Step 3
+- [x] Add Screenshots upload to Step 3 (up to 5)
+- [x] Add actual download functionality to Step 8
+- [x] Add App Details section with permissions
+- [x] Add Privacy & Legal info to Step 8

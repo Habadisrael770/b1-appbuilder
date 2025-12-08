@@ -21,6 +21,10 @@ export const users = mysqlTable("users", {
   trialEndsAt: timestamp("trialEndsAt"),
   /** Whether the user is currently in trial period */
   isTrialActive: int("isTrialActive").default(1).notNull(),
+  /** Stripe customer ID for payment method storage */
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  /** Default payment method ID (optional) */
+  defaultPaymentMethodId: varchar("defaultPaymentMethodId", { length: 255 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -64,6 +68,8 @@ export const subscriptions = mysqlTable("subscriptions", {
   currentPeriodStart: timestamp("currentPeriodStart"),
   currentPeriodEnd: timestamp("currentPeriodEnd"),
   cancelAtPeriodEnd: int("cancelAtPeriodEnd").default(0).notNull(),
+  /** Whether user has added a payment method (for trial tracking) */
+  hasPaymentMethod: int("hasPaymentMethod").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -81,7 +87,7 @@ export const payments = mysqlTable("payments", {
   amount: int("amount").notNull(),
   currency: varchar("currency", { length: 3 }).default("USD").notNull(),
   status: mysqlEnum("status", ["SUCCEEDED", "PENDING", "FAILED"]).notNull(),
-  paymentMethod: varchar("paymentMethod", { length: 50 }).notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 50 }),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });

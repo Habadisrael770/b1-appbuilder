@@ -29,6 +29,13 @@
       "when": 1763533066088,
       "tag": "0003_rare_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1765207056503,
+      "tag": "0004_thankful_tattoo",
+      "breakpoints": true
     }
   ]
 }

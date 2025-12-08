@@ -78,7 +78,7 @@ export function ChatWidget() {
           {/* Chat Header */}
           <div className="bg-[#00A86B] text-white p-4 rounded-t-2xl flex justify-between items-center flex-shrink-0">
             <div>
-              <h3 className="font-semibold text-lg">B1 AppBuilder Support</h3>
+              <h3 className="font-semibold text-lg">web2 app</h3>
               <p className="text-xs text-green-100">We typically reply in minutes</p>
             </div>
             <button
