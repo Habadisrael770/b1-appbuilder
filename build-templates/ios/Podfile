@@ -1,0 +1,52 @@
+# Podfile for B1 AppBuilder iOS app
+
+platform :ios, '13.0'
+
+target 'MyApp' do
+  # Pods for MyApp
+  
+  # WebKit is built-in, no need to add
+  
+  # Networking
+  pod 'Alamofire', '~> 5.7'
+  
+  # JSON parsing
+  pod 'SwiftyJSON', '~> 5.0'
+  
+  # Keychain
+  pod 'KeychainAccess', '~> 4.2'
+  
+  # Logging
+  pod 'CocoaLumberjack/Swift', '~> 3.7'
+  
+  # UI
+  pod 'SnapKit', '~> 5.6'
+  
+  # Analytics (optional)
+  # pod 'Firebase/Analytics'
+  
+  # Crash reporting (optional)
+  # pod 'Crashlytics'
+  
+  target 'MyAppTests' do
+    inherit! :search_paths
+    # Pods for testing
+    pod 'Quick'
+    pod 'Nimble'
+  end
+  
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_CAMERA=1',
+        'PERMISSION_MICROPHONE=1',
+        'PERMISSION_LOCATION=1',
+      ]
+    end
+  end
+end

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">B1 App</string>
+    <string name="app_id">com.b1appbuilder</string>
+    <string name="website_url">https://example.com</string>
+    <string name="primary_color">#007AFF</string>
+    <string name="app_version">1.0.0</string>
+    
+    <!-- Error messages -->
+    <string name="error_loading_page">Error loading page</string>
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_timeout">Connection timeout</string>
+    <string name="error_permission_denied">Permission denied</string>
+    
+    <!-- UI strings -->
+    <string name="loading">Loading...</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    
+    <!-- Permission strings -->
+    <string name="permission_camera">Camera</string>
+    <string name="permission_microphone">Microphone</string>
+    <string name="permission_location">Location</string>
+    <string name="permission_storage">Storage</string>
+</resources>
