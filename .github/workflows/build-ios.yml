@@ -1,0 +1,118 @@
+name: Build iOS IPA
+
+on:
+  repository_dispatch:
+    types: [build-ios]
+  workflow_dispatch:
+    inputs:
+      appId:
+        description: 'App ID'
+        required: true
+      appName:
+        description: 'App Name'
+        required: true
+      websiteUrl:
+        description: 'Website URL'
+        required: true
+      primaryColor:
+        description: 'Primary Color (hex)'
+        required: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+      
+      - name: Install dependencies
+        run: |
+          brew install cocoapods
+          cd build-templates/ios && pod install || true
+      
+      - name: Download assets
+        run: |
+          mkdir -p build-templates/ios/assets
+          echo "Assets directory created"
+      
+      - name: Configure app
+        run: |
+          chmod +x scripts/configure-ios.sh
+          ./scripts/configure-ios.sh "${{ github.event.client_payload.appId }}" "${{ github.event.client_payload.appName }}" "${{ github.event.client_payload.websiteUrl }}" "${{ github.event.client_payload.primaryColor }}"
+      
+      - name: Import signing certificate
+        run: |
+          echo "${{ secrets.IOS_SIGNING_CERT }}" | base64 -d > cert.p12
+          security import cert.p12 -P "${{ secrets.IOS_CERT_PASSWORD }}" -A -t cert -f pkcs12 -k ~/Library/Keychains/login.keychain-db
+          rm cert.p12
+      
+      - name: Import provisioning profile
+        run: |
+          echo "${{ secrets.IOS_PROVISIONING_PROFILE }}" | base64 -d > profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          rm profile.mobileprovision
+      
+      - name: Build archive
+        run: |
+          cd build-templates/ios
+          xcodebuild -workspace MyApp.xcworkspace \
+            -scheme MyApp \
+            -configuration Release \
+            -derivedDataPath build \
+            -archivePath build/MyApp.xcarchive \
+            archive
+      
+      - name: Export IPA
+        run: |
+          cd build-templates/ios
+          xcodebuild -exportArchive \
+            -archivePath build/MyApp.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/ipa
+      
+      - name: Sign IPA
+        run: |
+          chmod +x scripts/sign-ipa.sh
+          ./scripts/sign-ipa.sh
+        env:
+          SIGNING_CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+      
+      - name: Upload to S3
+        run: |
+          chmod +x scripts/upload-s3.sh
+          ./scripts/upload-s3.sh "${{ github.event.client_payload.appId }}" "ios"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+      
+      - name: Update database
+        run: |
+          chmod +x scripts/update-db.sh
+          ./scripts/update-db.sh "${{ github.event.client_payload.appId }}" "IOS"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      
+      - name: Notify backend
+        run: |
+          curl -X POST http://localhost:3000/api/builds/complete \
+            -H "Content-Type: application/json" \
+            -d '{
+              "appId": "${{ github.event.client_payload.appId }}",
+              "platform": "IOS",
+              "status": "COMPLETED"
+            }'
+      
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-ipa
+          path: build-templates/ios/build/ipa/

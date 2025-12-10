@@ -1,0 +1,102 @@
+name: Build Android APK
+
+on:
+  repository_dispatch:
+    types: [build-android]
+  workflow_dispatch:
+    inputs:
+      appId:
+        description: 'App ID'
+        required: true
+      appName:
+        description: 'App Name'
+        required: true
+      websiteUrl:
+        description: 'Website URL'
+        required: true
+      primaryColor:
+        description: 'Primary Color (hex)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+      
+      - name: Accept Android licenses
+        run: |
+          yes | $ANDROID_SDK_ROOT/tools/bin/sdkmanager --licenses
+      
+      - name: Configure Gradle
+        run: |
+          mkdir -p ~/.gradle
+          echo "org.gradle.jvmargs=-Xmx2048m" >> ~/.gradle/gradle.properties
+      
+      - name: Download assets
+        run: |
+          mkdir -p build-templates/android/assets
+          echo "Assets directory created"
+      
+      - name: Configure app
+        run: |
+          chmod +x scripts/configure-android.sh
+          ./scripts/configure-android.sh "${{ github.event.client_payload.appId }}" "${{ github.event.client_payload.appName }}" "${{ github.event.client_payload.websiteUrl }}" "${{ github.event.client_payload.primaryColor }}"
+      
+      - name: Build APK
+        run: |
+          cd build-templates/android
+          chmod +x ../../scripts/build-android.sh
+          ../../scripts/build-android.sh
+      
+      - name: Sign APK
+        run: |
+          chmod +x scripts/sign-apk.sh
+          ./scripts/sign-apk.sh
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      
+      - name: Upload to S3
+        run: |
+          chmod +x scripts/upload-s3.sh
+          ./scripts/upload-s3.sh "${{ github.event.client_payload.appId }}" "android"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+      
+      - name: Update database
+        run: |
+          chmod +x scripts/update-db.sh
+          ./scripts/update-db.sh "${{ github.event.client_payload.appId }}" "ANDROID"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      
+      - name: Notify backend
+        run: |
+          curl -X POST http://localhost:3000/api/builds/complete \
+            -H "Content-Type: application/json" \
+            -d '{
+              "appId": "${{ github.event.client_payload.appId }}",
+              "platform": "ANDROID",
+              "status": "COMPLETED"
+            }'
+      
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-apk
+          path: build-templates/android/app/build/outputs/apk/release/
