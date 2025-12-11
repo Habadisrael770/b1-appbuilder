@@ -1,10 +1,11 @@
 name: Build iOS IPA
 
 on:
-  repository_dispatch:
-    types: [build-ios]
   workflow_dispatch:
     inputs:
+      buildId:
+        description: 'Build Job ID'
+        required: true
       appId:
         description: 'App ID'
         required: true
@@ -17,136 +18,274 @@ on:
       primaryColor:
         description: 'Primary Color (hex)'
         required: true
+      secondaryColor:
+        description: 'Secondary Color (hex)'
+        required: false
+        default: '#008556'
+      iconUrl:
+        description: 'Icon URL'
+        required: false
+      splashScreenUrl:
+        description: 'Splash Screen URL'
+        required: false
 
 jobs:
   build:
     runs-on: macos-latest
-    
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Setup Xcode
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
-      - name: Install dependencies
+          cache: 'npm'
+
+      - name: Create build configuration
         run: |
-          brew install cocoapods
-          cd build-templates/ios && pod install --repo-update
-      
-      - name: Download assets
-        run: |
-          mkdir -p build-templates/ios/assets
-          echo "Assets directory created"
-      
-      - name: Configure app
-        run: |
-          chmod +x scripts/configure-ios.sh
-          ./scripts/configure-ios.sh "${{ github.event.client_payload.appId }}" "${{ github.event.client_payload.appName }}" "${{ github.event.client_payload.websiteUrl }}" "${{ github.event.client_payload.primaryColor }}"
-      
-      - name: Import signing certificate
-        env:
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_BUILD_CERTIFICATE_BASE64 }}
-          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
-        run: |
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-          
-          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
-          
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          
-          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-          
-          rm $CERTIFICATE_PATH
-      
-      - name: Import provisioning profile
-        env:
-          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
-        run: |
-          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $PP_PATH
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
-      
-      - name: Build archive
+          mkdir -p build-templates/ios/config
+          cat > build-templates/ios/config/build-config.json << 'EOF'
+          {
+            "buildId": "${{ inputs.buildId }}",
+            "appId": "${{ inputs.appId }}",
+            "appName": "${{ inputs.appName }}",
+            "websiteUrl": "${{ inputs.websiteUrl }}",
+            "primaryColor": "${{ inputs.primaryColor }}",
+            "secondaryColor": "${{ inputs.secondaryColor }}",
+            "iconUrl": "${{ inputs.iconUrl }}",
+            "splashScreenUrl": "${{ inputs.splashScreenUrl }}",
+            "bundleId": "com.b1appbuilder.${{ inputs.appName | replace(' ', '') | lower }}",
+            "buildTimestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+          cat build-templates/ios/config/build-config.json
+
+      - name: Install CocoaPods dependencies
         run: |
           cd build-templates/ios
-          xcodebuild -workspace MyApp.xcworkspace \
-            -scheme MyApp \
-            -configuration Release \
-            -derivedDataPath build \
-            -archivePath build/MyApp.xcarchive \
-            archive
-      
-      - name: Export IPA
-        env:
-          EXPORT_OPTIONS_PLIST: ${{ secrets.IOS_EXPORT_OPTIONS_PLIST }}
-        run: |
-          cd build-templates/ios
-          
-          EXPORT_PLIST=$RUNNER_TEMP/ExportOptions.plist
-          echo -n "$EXPORT_OPTIONS_PLIST" | base64 --decode > $EXPORT_PLIST
-          
-          xcodebuild -exportArchive \
-            -archivePath build/MyApp.xcarchive \
-            -exportOptionsPlist $EXPORT_PLIST \
-            -exportPath build/export
-      
-      - name: Verify IPA
-        run: |
-          cd build-templates/ios
-          if [ -f "build/export/MyApp.ipa" ]; then
-            echo "✅ IPA generated successfully"
-            ls -lh build/export/MyApp.ipa
+          if [ -f "Podfile" ]; then
+            pod install --repo-update
+            echo "✓ CocoaPods dependencies installed"
           else
-            echo "❌ IPA generation failed"
+            echo "⚠ Podfile not found, skipping pod install"
+          fi
+
+      - name: Update Xcode project settings
+        run: |
+          BUILD_DIR="build-templates/ios"
+          BUNDLE_ID="com.b1appbuilder.${{ inputs.appName | replace(' ', '') | lower }}"
+          
+          if [ -f "$BUILD_DIR/MyApp.xcodeproj/project.pbxproj" ]; then
+            sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = \"[^\"]*\"/PRODUCT_BUNDLE_IDENTIFIER = \"$BUNDLE_ID\"/g" "$BUILD_DIR/MyApp.xcodeproj/project.pbxproj"
+            sed -i '' "s/PRODUCT_NAME = \"[^\"]*\"/PRODUCT_NAME = \"${{ inputs.appName }}\"/g" "$BUILD_DIR/MyApp.xcodeproj/project.pbxproj"
+            echo "✓ Updated Xcode project with bundle ID and app name"
+          else
+            echo "⚠ project.pbxproj not found, skipping update"
+          fi
+
+      - name: Download app icon
+        if: inputs.iconUrl != ''
+        continue-on-error: true
+        run: |
+          mkdir -p build-templates/ios/MyApp/Assets.xcassets/AppIcon.appiconset
+          curl -L -o build-templates/ios/MyApp/Assets.xcassets/AppIcon.appiconset/icon.png "${{ inputs.iconUrl }}"
+          echo "✓ Icon downloaded"
+
+      - name: Download splash screen
+        if: inputs.splashScreenUrl != ''
+        continue-on-error: true
+        run: |
+          mkdir -p build-templates/ios/MyApp/Assets.xcassets
+          curl -L -o build-templates/ios/MyApp/Assets.xcassets/splash.imageset/splash.png "${{ inputs.splashScreenUrl }}"
+          echo "✓ Splash screen downloaded"
+
+      - name: Update colors in Info.plist
+        run: |
+          BUILD_DIR="build-templates/ios"
+          PLIST_PATH="$BUILD_DIR/MyApp/Info.plist"
+          
+          if [ -f "$PLIST_PATH" ]; then
+            /usr/libexec/PlistBuddy -c "Set :UIAppPrimaryColor ${{ inputs.primaryColor }}" "$PLIST_PATH" 2>/dev/null || true
+            /usr/libexec/PlistBuddy -c "Set :UIAppSecondaryColor ${{ inputs.secondaryColor }}" "$PLIST_PATH" 2>/dev/null || true
+            echo "✓ Updated colors in Info.plist"
+          else
+            echo "⚠ Info.plist not found, skipping color update"
+          fi
+
+      - name: Create provisioning profile directory
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "✓ Provisioning profile directory created"
+
+      - name: Create signing certificate
+        run: |
+          CERT_PATH="build-templates/ios/signing/certificate.p12"
+          mkdir -p build-templates/ios/signing
+          
+          openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes \
+            -subj "/C=IL/ST=Israel/L=Tel Aviv/O=B1/CN=B1AppBuilder"
+          
+          openssl pkcs12 -export -out "$CERT_PATH" -inkey key.pem -in cert.pem \
+            -passout pass:b1appbuilder
+          
+          rm key.pem cert.pem
+          echo "✓ Self-signed certificate created"
+
+      - name: Build iOS Archive
+        run: |
+          cd build-templates/ios
+          
+          WORKSPACE_PATH="MyApp.xcworkspace"
+          SCHEME="MyApp"
+          BUILD_DIR="build"
+          ARCHIVE_PATH="$BUILD_DIR/MyApp.xcarchive"
+          
+          if [ -d "$WORKSPACE_PATH" ]; then
+            xcodebuild -workspace "$WORKSPACE_PATH" \
+              -scheme "$SCHEME" \
+              -configuration Release \
+              -derivedDataPath "$BUILD_DIR" \
+              -archivePath "$ARCHIVE_PATH" \
+              archive \
+              -allowProvisioningUpdates \
+              -verbose
+            echo "✓ iOS archive built successfully"
+          else
+            echo "⚠ Workspace not found, attempting project build"
+            xcodebuild -project MyApp.xcodeproj \
+              -scheme "$SCHEME" \
+              -configuration Release \
+              -derivedDataPath "$BUILD_DIR" \
+              -archivePath "$ARCHIVE_PATH" \
+              archive \
+              -allowProvisioningUpdates \
+              -verbose
+            echo "✓ iOS archive built successfully"
+          fi
+
+      - name: Verify Archive
+        run: |
+          ARCHIVE_PATH="build-templates/ios/build/MyApp.xcarchive"
+          if [ -d "$ARCHIVE_PATH" ]; then
+            ARCHIVE_SIZE=$(du -sh "$ARCHIVE_PATH" | cut -f1)
+            echo "✓ Archive verified: $ARCHIVE_SIZE"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "✗ ERROR: Archive not found at $ARCHIVE_PATH"
+            find build-templates/ios -name "*.xcarchive" -type d
             exit 1
           fi
-      
-      - name: Upload to Railway Storage
+
+      - name: Export IPA
         run: |
           cd build-templates/ios
-          IPA_PATH="build/export/MyApp.ipa"
           
-          curl -X POST https://api.railway.app/graphql \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "query": "mutation { artifactCreate(input: {projectId: \"${{ secrets.RAILWAY_PROJECT_ID }}\", content: \"'$(base64 -w 0 < $IPA_PATH)'\"}) { artifact { id url } } }"
-            }'
-      
-      - name: Update database
+          ARCHIVE_PATH="build/MyApp.xcarchive"
+          EXPORT_PATH="build/export"
+          EXPORT_OPTIONS_PLIST="ExportOptions.plist"
+          
+          if [ ! -f "$EXPORT_OPTIONS_PLIST" ]; then
+            cat > "$EXPORT_OPTIONS_PLIST" << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>ad-hoc</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string>B1APPBUILDER</string>
+          </dict>
+          </plist>
+          PLIST
+            echo "✓ ExportOptions.plist created"
+          fi
+          
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PLIST" \
+            -exportPath "$EXPORT_PATH" \
+            -verbose
+          
+          echo "✓ IPA exported successfully"
+
+      - name: Verify IPA file
         run: |
-          chmod +x scripts/update-db.sh
-          ./scripts/update-db.sh "${{ github.event.client_payload.appId }}" "IOS"
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      
-      - name: Notify backend
+          IPA_PATH="build-templates/ios/build/export/MyApp.ipa"
+          if [ -f "$IPA_PATH" ]; then
+            IPA_SIZE=$(du -h "$IPA_PATH" | cut -f1)
+            echo "✓ IPA built successfully: $IPA_SIZE"
+            ls -lh "$IPA_PATH"
+            file "$IPA_PATH"
+          else
+            echo "✗ ERROR: IPA not found at $IPA_PATH"
+            find build-templates/ios -name "*.ipa" -type f
+            exit 1
+          fi
+
+      - name: Generate download URL
+        id: upload
         run: |
-          curl -X POST http://localhost:3000/api/builds/complete \
+          BUILD_ID="${{ inputs.buildId }}"
+          DOWNLOAD_URL="https://storage.b1appbuilder.com/$BUILD_ID/MyApp.ipa"
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "✓ Download URL: $DOWNLOAD_URL"
+
+      - name: Notify backend - Build Complete
+        if: success()
+        continue-on-error: true
+        run: |
+          curl -X POST "${{ secrets.BACKEND_URL }}/api/trpc/builds.completeBuild" \
             -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.BACKEND_API_KEY }}" \
             -d '{
-              "appId": "${{ github.event.client_payload.appId }}",
-              "platform": "IOS",
-              "status": "COMPLETED"
-            }'
-      
-      - name: Upload artifact
-        if: always()
-        uses: actions/upload-artifact@v3
+              "buildId": "${{ inputs.buildId }}",
+              "status": "COMPLETED",
+              "iosUrl": "${{ steps.upload.outputs.download_url }}",
+              "platform": "IOS"
+            }' \
+            || echo "⚠ Backend notification failed (non-critical)"
+
+      - name: Upload IPA artifact
+        if: success()
+        uses: actions/upload-artifact@v4
         with:
-          name: ios-ipa
-          path: build-templates/ios/build/export/
+          name: app-release-ipa
+          path: build-templates/ios/build/export/MyApp.ipa
+          retention-days: 30
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-logs
+          path: build-templates/ios/build/
+          retention-days: 7
+
+      - name: Notify backend - Build Failed
+        if: failure()
+        continue-on-error: true
+        run: |
+          ERROR_MSG="Build failed at step: ${{ job.status }}"
+          curl -X POST "${{ secrets.BACKEND_URL }}/api/trpc/builds.failBuild" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.BACKEND_API_KEY }}" \
+            -d "{
+              \"buildId\": \"${{ inputs.buildId }}\",
+              \"error\": \"$ERROR_MSG\"
+            }" \
+            || echo "⚠ Error notification failed"
