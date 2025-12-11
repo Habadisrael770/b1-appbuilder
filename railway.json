@@ -1,0 +1,54 @@
+{
+  "name": "B1 AppBuilder - Build Server",
+  "description": "Automated APK/IPA build server for web-to-app conversion",
+  "services": [
+    {
+      "name": "build-server",
+      "image": "ubuntu:22.04",
+      "environment": {
+        "ANDROID_SDK_ROOT": "/opt/android-sdk",
+        "ANDROID_HOME": "/opt/android-sdk",
+        "JAVA_HOME": "/usr/lib/jvm/java-11-openjdk-amd64",
+        "PATH": "/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:$PATH"
+      },
+      "volumes": [
+        {
+          "name": "android-sdk",
+          "path": "/opt/android-sdk"
+        },
+        {
+          "name": "gradle-cache",
+          "path": "/root/.gradle"
+        }
+      ],
+      "ports": [
+        {
+          "port": 8080,
+          "public": true
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "GITHUB_TOKEN": {
+      "description": "GitHub token for API access",
+      "required": true
+    },
+    "AWS_ACCESS_KEY_ID": {
+      "description": "AWS access key for S3 upload",
+      "required": true
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "description": "AWS secret key for S3 upload",
+      "required": true
+    },
+    "S3_BUCKET": {
+      "description": "S3 bucket for storing APK/IPA files",
+      "required": true
+    },
+    "OPENROUTER_API_KEY": {
+      "description": "OpenRouter API key for AI orchestration",
+      "required": false
+    }
+  }
+}

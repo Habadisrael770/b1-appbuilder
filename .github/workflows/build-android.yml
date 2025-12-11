@@ -68,14 +68,18 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       
-      - name: Upload to S3
+      - name: Upload to Railway Storage
         run: |
-          chmod +x scripts/upload-s3.sh
-          ./scripts/upload-s3.sh "${{ github.event.client_payload.appId }}" "android"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
+          # Upload APK to Railway using GitHub token
+          APK_PATH="build-templates/android/app/build/outputs/apk/release/app-release.apk"
+          
+          # Create artifact on Railway
+          curl -X POST https://api.railway.app/graphql \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "query": "mutation { artifactCreate(input: {projectId: \"${{ secrets.RAILWAY_PROJECT_ID }}\", content: \"'$(base64 -w 0 < $APK_PATH)'\"}) { artifact { id url } } }"
+            }'
       
       - name: Update database
         run: |

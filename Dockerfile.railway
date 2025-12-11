@@ -1,0 +1,72 @@
+FROM ubuntu:22.04
+
+# Set environment variables
+ENV ANDROID_SDK_ROOT=/opt/android-sdk \
+    ANDROID_HOME=/opt/android-sdk \
+    JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 \
+    PATH=/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools:/opt/android-sdk/ndk/25.2.9519653:$PATH \
+    DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    openjdk-11-jdk \
+    gradle \
+    nodejs \
+    npm \
+    python3 \
+    python3-pip \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup Android SDK
+RUN mkdir -p /opt/android-sdk && \
+    cd /opt/android-sdk && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip && \
+    unzip -q commandlinetools-linux-11076708_latest.zip && \
+    mkdir -p cmdline-tools/latest && \
+    mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true && \
+    rm commandlinetools-linux-11076708_latest.zip
+
+# Accept Android licenses
+RUN yes | /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+
+# Install Android SDK components
+RUN /opt/android-sdk/cmdline-tools/latest/bin/sdkmanager --install \
+    "platform-tools" \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
+    "ndk;25.2.9519653"
+
+# Install Node.js global tools
+RUN npm install -g \
+    @react-native-community/cli \
+    react-native-cli \
+    eas-cli \
+    fastlane
+
+# Setup Gradle
+RUN mkdir -p /root/.gradle && \
+    echo "org.gradle.jvmargs=-Xmx4096m -XX:+UseG1GC\norg.gradle.parallel=true\norg.gradle.workers.max=4\nandroid.useAndroidX=true\nandroid.enableJetifier=true" > /root/.gradle/gradle.properties
+
+# Create build directory
+WORKDIR /app
+
+# Copy build scripts
+COPY scripts/ /app/scripts/
+RUN chmod +x /app/scripts/*.sh
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Default command
+CMD ["/bin/bash"]
