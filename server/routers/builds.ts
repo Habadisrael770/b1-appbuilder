@@ -336,5 +336,60 @@ export const buildsRouter = router({
           message: "Failed to cancel build"
         });
       }
+    }),
+
+  /**
+   * Complete build (called by GitHub Actions)
+   */
+  completeBuild: protectedProcedure
+    .input(
+      z.object({
+        buildId: z.string(),
+        status: z.enum(["COMPLETED", "FAILED"]),
+        androidUrl: z.string().url().optional(),
+        iosUrl: z.string().url().optional(),
+        platform: z.enum(["ANDROID", "IOS"])
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Build ${input.buildId} completed for ${input.platform}`);
+        return {
+          success: true,
+          message: "Build completion recorded"
+        };
+      } catch (error) {
+        console.error("Complete build error:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to record build completion"
+        });
+      }
+    }),
+
+  /**
+   * Fail build (called by GitHub Actions)
+   */
+  failBuild: protectedProcedure
+    .input(
+      z.object({
+        buildId: z.string(),
+        error: z.string()
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        console.log(`Build ${input.buildId} failed: ${input.error}`);
+        return {
+          success: true,
+          message: "Build failure recorded"
+        };
+      } catch (error) {
+        console.error("Fail build error:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to record build failure"
+        });
+      }
     })
 });
