@@ -154,3 +154,30 @@
 - [x] Add actual download functionality to Step 8
 - [x] Add App Details section with permissions
 - [x] Add Privacy & Legal info to Step 8
+
+## P0 - Critical Items (This Week)
+- [x] iOS Build Workflow - Enhanced GitHub Actions workflow with proper signing
+- [x] Error Handling in Backend - Comprehensive error handling in builds router
+- [x] Error Display Component - StepEightEnhanced with build status tracking
+- [x] Security Hardening Guide - Documentation for security best practices
+- [x] iOS Setup Guide - Complete guide for iOS certificate and provisioning setup
+- [ ] Test First Android Build - Generate keystore and test APK build
+- [ ] Test First iOS Build - Test IPA generation with certificates
+- [ ] Implement Rate Limiting - Add rate limiting to API endpoints
+- [ ] Add Error Logging - Implement comprehensive error logging
+
+## P1 - High Priority (Next Week)
+- [ ] E2E Tests - Create app → build → download → run
+- [ ] Payment Flow Tests - Test free trial and upgrade flow
+- [ ] Dashboard Tests - Test all dashboard functionality
+- [ ] Add Logging Dashboard - Simple admin view for build queue
+- [ ] Implement Build Retry Logic - Automatic retry on build failure
+- [ ] Add Build Timeout - Prevent infinite builds
+
+## P2 - Nice to Have (Future)
+- [ ] App Store Integration - Auto-publish to App Store
+- [ ] Play Store Integration - Auto-publish to Google Play
+- [ ] Push Notifications - Add push notification support
+- [ ] White-labeling - Support custom branding
+- [ ] Analytics Dashboard - Track app metrics
+- [ ] OTA Updates - Over-the-air app updates
