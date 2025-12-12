@@ -6,7 +6,7 @@ import { StepFour } from "@/components/convert/StepFour";
 import { StepFive } from "@/components/convert/StepFive";
 import { StepSix } from "@/components/convert/StepSix";
 import { StepSeven } from "@/components/convert/StepSeven";
-import { StepEight } from "@/components/convert/StepEight";
+import { StepEightEnhanced } from "@/components/convert/StepEightEnhanced";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
@@ -19,6 +19,8 @@ interface ConversionState {
   primaryColor: string;
   secondaryColor?: string;
   plan?: "BASIC" | "PRO" | "ENTERPRISE";
+  appId?: string;
+  jobId?: string;
 }
 
 export default function Convert() {
@@ -140,10 +142,12 @@ export default function Convert() {
             />
           )}
           {currentStep === 7 && <StepSeven onNext={handleStepSeven} />}
-          {currentStep === 8 && conversionData.appName && (
-            <StepEight
+          {currentStep === 8 && conversionData.appName && conversionData.jobId && (
+            <StepEightEnhanced
+              appId={conversionData.appId || ""}
               appName={conversionData.appName}
               platform={conversionData.platform || "BOTH"}
+              jobId={conversionData.jobId}
             />
           )}
         </Card>

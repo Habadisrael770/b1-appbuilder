@@ -11,8 +11,8 @@
  * - Timeout (max 20 minutes per build)
  */
 
-import { db } from "./db";
-import { builds, apps } from "../drizzle/schema";
+import { getDb } from "./db";
+import { apps } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { execSync } from "child_process";
 import * as fs from "fs";
@@ -29,6 +29,24 @@ function log(buildId: string, message: string, level: "INFO" | "WARN" | "ERROR" 
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] [BUILD:${buildId}] [${level}] ${message}`);
 }
+
+// In-memory build queue (use database in production)
+interface BuildJob {
+  id: string;
+  appId: string;
+  userId: string;
+  platform: "ANDROID" | "IOS" | "BOTH";
+  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+  progress: number;
+  retries: number;
+  createdAt: Date;
+  updatedAt: Date;
+  error?: string;
+  androidUrl?: string;
+  iosUrl?: string;
+}
+
+const buildQueue: Map<string, BuildJob> = new Map();
 
 /**
  * Start the build worker - continuously polls for pending jobs
@@ -51,20 +69,21 @@ export async function startBuildWorker() {
  */
 async function processPendingJobs() {
   try {
-    // Get pending jobs (ordered by creation date)
-    const pendingJobs = await db
-      .select()
-      .from(builds)
-      .where(eq(builds.status, "PENDING"))
-      .orderBy(builds.createdAt)
-      .limit(1); // Process one at a time
+    // Get first pending job from queue
+    let pendingJob: BuildJob | null = null;
+    
+    for (const [, job] of Array.from(buildQueue.entries())) {
+      if (job.status === "PENDING") {
+        pendingJob = job;
+        break;
+      }
+    }
 
-    if (pendingJobs.length === 0) {
+    if (!pendingJob) {
       return; // No jobs to process
     }
 
-    const job = pendingJobs[0];
-    await processBuildJob(job);
+    await processBuildJob(pendingJob);
   } catch (error) {
     log("WORKER", `Error processing pending jobs: ${error}`, "ERROR");
   }
@@ -73,26 +92,27 @@ async function processPendingJobs() {
 /**
  * Process a single build job
  */
-async function processBuildJob(job: any) {
+async function processBuildJob(job: BuildJob) {
   const buildId = job.id;
   log(buildId, `Starting build job for app ${job.appId}`);
 
   try {
     // Update status to RUNNING
-    await db
-      .update(builds)
-      .set({
-        status: "RUNNING",
-        progress: 10,
-        startedAt: new Date()
-      })
-      .where(eq(builds.id, buildId));
+    job.status = "RUNNING";
+    job.progress = 10;
+    job.updatedAt = new Date();
+    buildQueue.set(buildId, job);
 
-    // Get app details
+    // Get app details from database
+    const db = await getDb();
+    if (!db) {
+      throw new Error("Database connection failed");
+    }
+
     const appResults = await db
       .select()
       .from(apps)
-      .where(eq(apps.id, job.appId));
+      .where(eq(apps.id, parseInt(job.appId)));
 
     const app = appResults[0];
 
@@ -127,10 +147,9 @@ async function processBuildJob(job: any) {
       log(buildId, `Android APK built: ${androidUrl}`);
       
       // Update progress
-      await db
-        .update(builds)
-        .set({ progress: 50 })
-        .where(eq(builds.id, buildId));
+      job.progress = 50;
+      job.updatedAt = new Date();
+      buildQueue.set(buildId, job);
     }
 
     if (job.platform === "IOS" || job.platform === "BOTH") {
@@ -139,23 +158,18 @@ async function processBuildJob(job: any) {
       log(buildId, `iOS IPA built: ${iosUrl}`);
       
       // Update progress
-      await db
-        .update(builds)
-        .set({ progress: 75 })
-        .where(eq(builds.id, buildId));
+      job.progress = 75;
+      job.updatedAt = new Date();
+      buildQueue.set(buildId, job);
     }
 
     // Update status to COMPLETED
-    await db
-      .update(builds)
-      .set({
-        status: "COMPLETED",
-        progress: 100,
-        androidUrl,
-        iosUrl,
-        completedAt: new Date()
-      })
-      .where(eq(builds.id, buildId));
+    job.status = "COMPLETED";
+    job.progress = 100;
+    job.androidUrl = androidUrl;
+    job.iosUrl = iosUrl;
+    job.updatedAt = new Date();
+    buildQueue.set(buildId, job);
 
     log(buildId, "Build completed successfully");
   } catch (error) {
@@ -165,24 +179,17 @@ async function processBuildJob(job: any) {
     if (job.retries < MAX_RETRIES) {
       log(buildId, `Retrying build (attempt ${job.retries + 1}/${MAX_RETRIES})...`);
       
-      await db
-        .update(builds)
-        .set({
-          status: "PENDING",
-          retries: job.retries + 1,
-          progress: 0
-        })
-        .where(eq(builds.id, buildId));
+      job.status = "PENDING";
+      job.retries += 1;
+      job.progress = 0;
+      job.updatedAt = new Date();
+      buildQueue.set(buildId, job);
     } else {
       // Mark as failed
-      await db
-        .update(builds)
-        .set({
-          status: "FAILED",
-          error: String(error),
-          completedAt: new Date()
-        })
-        .where(eq(builds.id, buildId));
+      job.status = "FAILED";
+      job.error = String(error);
+      job.updatedAt = new Date();
+      buildQueue.set(buildId, job);
     }
   }
 }
@@ -364,24 +371,22 @@ function executeWithTimeout(command: string, timeout: number): string {
  * Get build status
  */
 export async function getBuildStatus(buildId: string) {
-  const results = await db
-    .select()
-    .from(builds)
-    .where(eq(builds.id, buildId));
-
-  return results[0] || null;
+  return buildQueue.get(buildId) || null;
 }
 
 /**
  * Get build history for an app
  */
 export async function getBuildHistory(appId: string, limit: number = 10) {
-  return await db
-    .select()
-    .from(builds)
-    .where(eq(builds.appId, appId))
-    .orderBy(builds.createdAt)
-    .limit(limit);
+  const history: BuildJob[] = [];
+  
+  for (const [, job] of Array.from(buildQueue.entries())) {
+    if (job.appId === appId) {
+      history.push(job);
+    }
+  }
+  
+  return history.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, limit);
 }
 
 /**
@@ -390,7 +395,7 @@ export async function getBuildHistory(appId: string, limit: number = 10) {
 export async function startBuildJob(appId: string, userId: string, platform: "ANDROID" | "IOS" | "BOTH"): Promise<string> {
   const buildId = `build_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  await db.insert(builds).values({
+  const job: BuildJob = {
     id: buildId,
     appId,
     userId,
@@ -400,7 +405,9 @@ export async function startBuildJob(appId: string, userId: string, platform: "AN
     retries: 0,
     createdAt: new Date(),
     updatedAt: new Date()
-  });
+  };
+
+  buildQueue.set(buildId, job);
 
   log(buildId, `Build job created for app ${appId}`);
   return buildId;
@@ -410,11 +417,42 @@ export async function startBuildJob(appId: string, userId: string, platform: "AN
  * Cancel a build job
  */
 export async function cancelBuildJob(buildId: string): Promise<boolean> {
-  await db
-    .update(builds)
-    .set({ status: "FAILED", error: "Cancelled by user" })
-    .where(eq(builds.id, buildId));
+  const job = buildQueue.get(buildId);
+  
+  if (!job) {
+    return false;
+  }
+
+  job.status = "FAILED";
+  job.error = "Cancelled by user";
+  job.updatedAt = new Date();
+  buildQueue.set(buildId, job);
 
   log(buildId, "Build job cancelled");
   return true;
+}
+
+/**
+ * Get build job status (alias for getBuildStatus)
+ */
+export async function getBuildJobStatus(buildId: string) {
+  const job = buildQueue.get(buildId);
+  
+  if (!job) {
+    return {
+      status: "NOT_FOUND",
+      progress: 0,
+      error: "Build not found"
+    };
+  }
+
+  return {
+    status: job.status,
+    progress: job.progress,
+    error: job.error,
+    result: {
+      androidUrl: job.androidUrl,
+      iosUrl: job.iosUrl
+    }
+  };
 }
