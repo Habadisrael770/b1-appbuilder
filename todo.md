@@ -186,3 +186,8 @@
 - [ ] White-labeling - Support custom branding
 - [ ] Analytics Dashboard - Track app metrics
 - [ ] OTA Updates - Over-the-air app updates
+
+## Urgent - TypeScript Errors (Before CI Push)
+- [ ] Fix StepEightEnhanced.tsx line 376 - 'appName' possibly undefined
+- [ ] Fix Convert.tsx line 35 - Remove 'jobId' property reference
+- [ ] Fix Convert.tsx line 51 - Remove 'jobId' from StepEightEnhanced props

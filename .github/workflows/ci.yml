@@ -1,0 +1,59 @@
+name: CI - Build, Type Check & Lint
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      # ⬇️ Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ⬇️ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      # ⬇️ Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # ⬇️ Install dependencies
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ⬇️ TypeScript strict check (no emit)
+      - name: TypeScript check
+        run: pnpm exec tsc --noEmit
+
+      # ⬇️ Lint check (if configured)
+      - name: Lint
+        run: |
+          if grep -q '"lint"' package.json; then
+            pnpm run lint
+          else
+            echo "⚠️ No lint script found, skipping"
+          fi
+
+      # ⬇️ Build (Vite + Server)
+      - name: Build
+        run: pnpm run build
+
+      # ⬇️ Success indicator
+      - name: CI completed
+        run: echo "✅ CI pipeline completed successfully"

@@ -373,7 +373,7 @@ export function StepEightEnhanced({ appId, appName, platform, buildId, resultUrl
                 <div className="flex justify-between">
                   <span className="text-gray-600">Bundle ID:</span>
                   <span className="font-medium text-gray-900 text-xs">
-                    com.b1appbuilder.{appName.replace(/\s+/g, "").toLowerCase()}
+                    com.b1appbuilder.{(appName || "app").replace(/\s+/g, "").toLowerCase()}
                   </span>
                 </div>
                 <div className="flex justify-between">
