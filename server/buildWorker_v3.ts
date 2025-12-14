@@ -126,16 +126,19 @@ async function processBuildJob(build: any) {
       const androidWorkflow = await triggerAndroidBuild(buildId, app);
       
       // Store GitHub run ID for tracking
-      await db
-        .update(builds)
-        .set({ 
-          githubRunId: androidWorkflow.data.id.toString(),
-          progress: 30,
-          updatedAt: new Date()
-        })
-        .where(eq(builds.id, buildId));
-      
-      log(buildId, `Android workflow triggered: run ${androidWorkflow.data.id}`);
+      const androidData = (androidWorkflow as any)?.data;
+      if (androidData && androidData.id) {
+        await db
+          .update(builds)
+          .set({ 
+            githubRunId: androidData.id.toString(),
+            progress: 30,
+            updatedAt: new Date()
+          })
+          .where(eq(builds.id, buildId));
+        
+        log(buildId, `Android workflow triggered: run ${(androidWorkflow.data as any)?.id}`);
+      }
     }
 
     if (build.platform === "IOS" || build.platform === "BOTH") {
@@ -144,16 +147,19 @@ async function processBuildJob(build: any) {
       const iosWorkflow = await triggerIosBuild(buildId, app);
       
       // Store GitHub run ID
-      await db
-        .update(builds)
-        .set({ 
-          githubRunIdIos: iosWorkflow.data.id.toString(),
-          progress: 50,
-          updatedAt: new Date()
-        })
-        .where(eq(builds.id, buildId));
-      
-      log(buildId, `iOS workflow triggered: run ${iosWorkflow.data.id}`);
+      const iosData = (iosWorkflow as any)?.data;
+      if (iosData && iosData.id) {
+        await db
+          .update(builds)
+          .set({ 
+            githubRunIdIos: iosData.id.toString(),
+            progress: 50,
+            updatedAt: new Date()
+          })
+          .where(eq(builds.id, buildId));
+        
+        log(buildId, `iOS workflow triggered: run ${(iosWorkflow.data as any)?.id}`);
+      }
     }
 
     // Update to BUILDING status

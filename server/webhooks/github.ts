@@ -94,9 +94,13 @@ githubWebhookRouter.post('/api/builds/complete', verifyApiKey, async (req, res) 
     // Update app status to COMPLETED
     const db = await getDb();
     if (db) {
-      const build = await db.query.builds.findFirst({
-        where: (buildsTable: any, { eq }: any) => eq(buildsTable.id, buildId)
-      });
+      const buildRows = await db
+        .select()
+        .from(builds)
+        .where(eq(builds.id, buildId))
+        .limit(1);
+      
+      const build = buildRows[0];
 
       if (build) {
         await db
@@ -165,9 +169,13 @@ githubWebhookRouter.post('/api/builds/fail', verifyApiKey, async (req, res) => {
     // Update app status to FAILED
     const db = await getDb();
     if (db) {
-      const build = await db.query.builds.findFirst({
-        where: (buildsTable: any, { eq }: any) => eq(buildsTable.id, buildId)
-      });
+      const buildRows = await db
+        .select()
+        .from(builds)
+        .where(eq(builds.id, buildId))
+        .limit(1);
+      
+      const build = buildRows[0];
 
       if (build) {
         await db

@@ -110,9 +110,9 @@ export const buildsRouter = router({
 
         const buildCount = todayBuilds[0]?.count || 0;
         
-        // Get user's plan (default to FREE)
-        const userPlan = ctx.user.plan || 'FREE';
-        const dailyLimit = BUILD_LIMITS[userPlan as keyof typeof BUILD_LIMITS];
+        // Get user's plan (default to FREE - user table doesn't have plan field)
+        const userPlan = 'FREE';
+        const dailyLimit = BUILD_LIMITS[userPlan as keyof typeof BUILD_LIMITS] || 5; // Default 5 builds per day
 
         if (buildCount >= dailyLimit) {
           throw new TRPCError({
@@ -335,6 +335,12 @@ export const buildsRouter = router({
 
         // Get app name for filename
         const db = await getDb();
+        if (!db) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Database connection failed"
+          });
+        }
         const appRows = await db
           .select()
           .from(apps)
@@ -477,8 +483,8 @@ export const buildsRouter = router({
             )
           );
 
-        // Get user's plan limit
-        const userPlan = ctx.user.plan || 'FREE';
+        // Get user's plan limit (default to FREE if not set)
+        const userPlan = 'FREE'; // Default plan for all users
         const dailyLimit = BUILD_LIMITS[userPlan as keyof typeof BUILD_LIMITS];
 
         return {
