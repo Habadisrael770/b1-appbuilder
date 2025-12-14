@@ -39,7 +39,7 @@ export function StepEightEnhanced({ appId, appName, platform, jobId }: StepEight
 
   // Poll build status
   const { data: statusData, isLoading: isStatusLoading } = trpc.builds.getBuildStatus.useQuery(
-    { jobId },
+    { buildId: jobId },
     {
       refetchInterval: buildState.status === "BUILDING" ? 3000 : false,
       enabled: buildState.status === "BUILDING"
@@ -52,9 +52,9 @@ export function StepEightEnhanced({ appId, appName, platform, jobId }: StepEight
       setBuildState({
         status: statusData.status as BuildStatus,
         progress: statusData.progress,
-        androidUrl: statusData.androidUrl,
-        iosUrl: statusData.iosUrl,
-        error: statusData.error
+        androidUrl: statusData.androidUrl ?? undefined,
+        iosUrl: statusData.iosUrl ?? undefined,
+        error: statusData.error ?? undefined
       });
     }
   }, [statusData]);
