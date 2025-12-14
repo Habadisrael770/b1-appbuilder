@@ -11,10 +11,12 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 
 interface StepEightEnhancedProps {
-  appId: string;
-  appName: string;
-  platform: "IOS" | "ANDROID" | "BOTH";
-  jobId: string;
+  appId?: string;
+  appName?: string;
+  platform?: "IOS" | "ANDROID" | "BOTH";
+  buildId?: string;
+  resultUrl?: string;
+  onComplete?: () => void;
 }
 
 type BuildStatus = "PENDING" | "BUILDING" | "COMPLETED" | "FAILED";
@@ -27,7 +29,7 @@ interface BuildState {
   error?: string;
 }
 
-export function StepEightEnhanced({ appId, appName, platform, jobId }: StepEightEnhancedProps) {
+export function StepEightEnhanced({ appId, appName, platform, buildId, resultUrl, onComplete }: StepEightEnhancedProps) {
   const [, setLocation] = useLocation();
   const [buildState, setBuildState] = useState<BuildState>({
     status: "BUILDING",
@@ -39,7 +41,7 @@ export function StepEightEnhanced({ appId, appName, platform, jobId }: StepEight
 
   // Poll build status
   const { data: statusData, isLoading: isStatusLoading } = trpc.builds.getBuildStatus.useQuery(
-    { buildId: jobId },
+    { buildId: buildId || "" },
     {
       refetchInterval: buildState.status === "BUILDING" ? 3000 : false,
       enabled: buildState.status === "BUILDING"

@@ -17,7 +17,7 @@ export async function startBuildWorker() {
 }
 async function processPendingJobs() {
   let pendingJob: BuildJob | null = null;
-  for (const [, job] of buildQueue.entries()) { if (job.status === "PENDING") { pendingJob = job; break; } }
+  for (const [, job] of Array.from(buildQueue.entries())) { if (job.status === "PENDING") { pendingJob = job; break; } }
   if (pendingJob) processBuildJob(pendingJob).catch(err => console.error(pendingJob!.id, err));
 }
 async function processBuildJob(job: BuildJob) {
