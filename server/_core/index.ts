@@ -7,6 +7,8 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import githubWebhookRouter from "../webhooks/github";
+import { startBuildWorker } from "../buildWorker_v3";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -35,6 +37,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // GitHub webhook for build notifications
+  app.use(githubWebhookRouter);
+  
   // tRPC API
   app.use(
     "/api/trpc",
@@ -56,6 +61,10 @@ async function startServer() {
   if (port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
+
+  // Start build worker
+  startBuildWorker();
+  console.log("✅ Build worker started");
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);

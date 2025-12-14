@@ -1,0 +1,341 @@
+name: Build Android APK (FIXED VERSION)
+
+# This workflow builds an Android APK from a website URL
+# Key fixes:
+# - Added build template directory check
+# - Fixed webhook endpoint URL
+# - Added proper error handling
+# - Uses correct authentication
+
+on:
+  workflow_dispatch:
+    inputs:
+      buildId:
+        description: 'Build Job ID'
+        required: true
+      appId:
+        description: 'App ID'
+        required: true
+      appName:
+        description: 'App Name'
+        required: true
+      websiteUrl:
+        description: 'Website URL'
+        required: true
+      primaryColor:
+        description: 'Primary Color (hex)'
+        required: true
+        default: '#00A86B'
+      secondaryColor:
+        description: 'Secondary Color (hex)'
+        required: false
+        default: '#008556'
+      iconUrl:
+        description: 'Icon URL'
+        required: false
+      splashScreenUrl:
+        description: 'Splash Screen URL'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 33
+          build-tools: '33.0.0'
+          ndk-version: '25.2.9519653'
+
+      - name: Verify build template exists
+        run: |
+          if [ ! -d "build-templates/android" ]; then
+            echo "❌ ERROR: build-templates/android directory not found!"
+            echo "Please create the Android build template first."
+            echo "See: docs/CREATE_BUILD_TEMPLATES.md"
+            exit 1
+          fi
+          
+          if [ ! -f "build-templates/android/app/build.gradle" ]; then
+            echo "❌ ERROR: build.gradle not found in template!"
+            exit 1
+          fi
+          
+          echo "✅ Build template found"
+          ls -la build-templates/android/
+
+      - name: Create build configuration
+        run: |
+          BUILD_DIR="build-templates/android"
+          mkdir -p "$BUILD_DIR/config"
+          
+          cat > "$BUILD_DIR/config/build-config.json" << EOF
+          {
+            "buildId": "${{ inputs.buildId }}",
+            "appId": "${{ inputs.appId }}",
+            "appName": "${{ inputs.appName }}",
+            "websiteUrl": "${{ inputs.websiteUrl }}",
+            "primaryColor": "${{ inputs.primaryColor }}",
+            "secondaryColor": "${{ inputs.secondaryColor }}",
+            "iconUrl": "${{ inputs.iconUrl }}",
+            "splashScreenUrl": "${{ inputs.splashScreenUrl }}",
+            "packageName": "com.b1appbuilder.$(echo '${{ inputs.appName }}' | tr -d ' ' | tr '[:upper:]' '[:lower:]')",
+            "buildTimestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          }
+          EOF
+          
+          echo "✅ Build configuration created"
+          cat "$BUILD_DIR/config/build-config.json"
+
+      - name: Update package name in build.gradle
+        run: |
+          BUILD_DIR="build-templates/android"
+          PACKAGE_NAME="com.b1appbuilder.$(echo '${{ inputs.appName }}' | tr -d ' ' | tr '[:upper:]' '[:lower:]')"
+          
+          if [ -f "$BUILD_DIR/app/build.gradle" ]; then
+            sed -i "s/applicationId \"[^\"]*\"/applicationId \"$PACKAGE_NAME\"/g" "$BUILD_DIR/app/build.gradle"
+            echo "✅ Updated package name to: $PACKAGE_NAME"
+          else
+            echo "⚠️ build.gradle not found, skipping"
+          fi
+
+      - name: Update app name in AndroidManifest.xml
+        run: |
+          BUILD_DIR="build-templates/android"
+          MANIFEST_PATH="$BUILD_DIR/app/src/main/AndroidManifest.xml"
+          
+          if [ -f "$MANIFEST_PATH" ]; then
+            sed -i "s/android:label=\"[^\"]*\"/android:label=\"${{ inputs.appName }}\"/g" "$MANIFEST_PATH"
+            echo "✅ Updated app name in manifest"
+          else
+            echo "⚠️ AndroidManifest.xml not found"
+          fi
+
+      - name: Update website URL in WebView
+        run: |
+          BUILD_DIR="build-templates/android"
+          
+          # Find MainActivity and update URL
+          find "$BUILD_DIR/app/src/main" -name "MainActivity.*" -type f | while read -r file; do
+            sed -i "s|https://example.com|${{ inputs.websiteUrl }}|g" "$file"
+            echo "✅ Updated URL in: $file"
+          done
+
+      - name: Download app icon
+        if: inputs.iconUrl != ''
+        continue-on-error: true
+        run: |
+          BUILD_DIR="build-templates/android"
+          ICON_DIR="$BUILD_DIR/app/src/main/res/mipmap-xxxhdpi"
+          mkdir -p "$ICON_DIR"
+          
+          curl -L -o "$ICON_DIR/ic_launcher.png" "${{ inputs.iconUrl }}" || echo "⚠️ Icon download failed"
+          
+          if [ -f "$ICON_DIR/ic_launcher.png" ]; then
+            echo "✅ Icon downloaded successfully"
+            ls -lh "$ICON_DIR/ic_launcher.png"
+          fi
+
+      - name: Download splash screen
+        if: inputs.splashScreenUrl != ''
+        continue-on-error: true
+        run: |
+          BUILD_DIR="build-templates/android"
+          DRAWABLE_DIR="$BUILD_DIR/app/src/main/res/drawable"
+          mkdir -p "$DRAWABLE_DIR"
+          
+          curl -L -o "$DRAWABLE_DIR/splash_screen.png" "${{ inputs.splashScreenUrl }}" || echo "⚠️ Splash screen download failed"
+          
+          if [ -f "$DRAWABLE_DIR/splash_screen.png" ]; then
+            echo "✅ Splash screen downloaded successfully"
+          fi
+
+      - name: Update brand colors
+        run: |
+          BUILD_DIR="build-templates/android"
+          COLORS_FILE="$BUILD_DIR/app/src/main/res/values/colors.xml"
+          
+          if [ -f "$COLORS_FILE" ]; then
+            # Remove # from color codes if present
+            PRIMARY="${{ inputs.primaryColor }}"
+            SECONDARY="${{ inputs.secondaryColor }}"
+            PRIMARY="${PRIMARY#\#}"
+            SECONDARY="${SECONDARY#\#}"
+            
+            sed -i "s/<color name=\"primary\">#[^<]*<\/color>/<color name=\"primary\">#$PRIMARY<\/color>/g" "$COLORS_FILE"
+            sed -i "s/<color name=\"secondary\">#[^<]*<\/color>/<color name=\"secondary\">#$SECONDARY<\/color>/g" "$COLORS_FILE"
+            
+            echo "✅ Updated brand colors"
+            grep -E "primary|secondary" "$COLORS_FILE"
+          fi
+
+      - name: Make gradlew executable
+        run: |
+          BUILD_DIR="build-templates/android"
+          chmod +x "$BUILD_DIR/gradlew"
+          echo "✅ Made gradlew executable"
+
+      - name: Build APK
+        run: |
+          BUILD_DIR="build-templates/android"
+          cd "$BUILD_DIR"
+          
+          echo "🔨 Starting Gradle build..."
+          ./gradlew clean assembleRelease -x lint --stacktrace --info 2>&1 | tee build.log
+          
+          echo "✅ Gradle build completed"
+
+      - name: Verify APK was created
+        run: |
+          BUILD_DIR="build-templates/android"
+          APK_PATH="$BUILD_DIR/app/build/outputs/apk/release/app-release.apk"
+          
+          if [ ! -f "$APK_PATH" ]; then
+            echo "❌ ERROR: APK not found at expected path!"
+            echo "Looking for APK files..."
+            find "$BUILD_DIR" -name "*.apk" -type f
+            exit 1
+          fi
+          
+          APK_SIZE=$(du -h "$APK_PATH" | cut -f1)
+          echo "✅ APK created successfully"
+          echo "   Size: $APK_SIZE"
+          echo "   Path: $APK_PATH"
+          
+          # Show APK details
+          file "$APK_PATH"
+
+      - name: Sign APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          BUILD_DIR="build-templates/android"
+          APK_PATH="$BUILD_DIR/app/build/outputs/apk/release/app-release.apk"
+          
+          # Decode keystore from base64
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.keystore
+            echo "✅ Keystore decoded from secrets"
+          else
+            echo "⚠️ No keystore found, creating temporary one"
+            keytool -genkey -v -keystore release.keystore \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -alias release-key \
+              -storepass android123 -keypass android123 \
+              -dname "CN=B1AppBuilder,O=B1,L=Tel Aviv,S=Israel,C=IL"
+            
+            KEYSTORE_PASSWORD="android123"
+            KEY_ALIAS="release-key"
+            KEY_PASSWORD="android123"
+          fi
+          
+          # Sign APK
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore release.keystore \
+            -storepass "${KEYSTORE_PASSWORD:-android123}" \
+            -keypass "${KEY_PASSWORD:-android123}" \
+            "$APK_PATH" "${KEY_ALIAS:-release-key}"
+          
+          echo "✅ APK signed successfully"
+          
+          # Verify signature
+          jarsigner -verify -verbose -certs "$APK_PATH"
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.appName }}-android-${{ inputs.buildId }}
+          path: build-templates/android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
+
+      - name: Get artifact download URL
+        id: artifact
+        run: |
+          # GitHub artifact URL format
+          REPO="${{ github.repository }}"
+          RUN_ID="${{ github.run_id }}"
+          
+          # The artifact will be available at:
+          # https://github.com/OWNER/REPO/actions/runs/RUN_ID
+          DOWNLOAD_URL="https://github.com/$REPO/actions/runs/$RUN_ID"
+          
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "✅ Artifact URL: $DOWNLOAD_URL"
+
+      - name: Notify backend - Build Complete
+        if: success()
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          API_KEY="${{ secrets.BACKEND_API_KEY }}"
+          
+          if [ -z "$BACKEND_URL" ] || [ -z "$API_KEY" ]; then
+            echo "⚠️ BACKEND_URL or BACKEND_API_KEY not set in secrets"
+            echo "Skipping backend notification"
+            exit 0
+          fi
+          
+          echo "📡 Notifying backend of build completion..."
+          
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "$BACKEND_URL/api/builds/complete" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: $API_KEY" \
+            -d "{
+              \"buildId\": \"${{ inputs.buildId }}\",
+              \"platform\": \"ANDROID\",
+              \"downloadUrl\": \"${{ steps.artifact.outputs.download_url }}\",
+              \"githubRunId\": \"${{ github.run_id }}\"
+            }")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Backend notified successfully"
+          else
+            echo "⚠️ Backend notification failed with HTTP $HTTP_CODE"
+            echo "Build is still successful, notification will be retried"
+          fi
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ inputs.buildId }}
+          path: build-templates/android/build.log
+          retention-days: 7
+
+      - name: Notify backend - Build Failed
+        if: failure()
+        run: |
+          BACKEND_URL="${{ secrets.BACKEND_URL }}"
+          API_KEY="${{ secrets.BACKEND_API_KEY }}"
+          
+          if [ -z "$BACKEND_URL" ] || [ -z "$API_KEY" ]; then
+            echo "⚠️ Backend credentials not configured"
+            exit 0
+          fi
+          
+          ERROR_MSG="Build failed at step: ${{ job.status }}"
+          
+          curl -X POST "$BACKEND_URL/api/builds/fail" \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: $API_KEY" \
+            -d "{
+              \"buildId\": \"${{ inputs.buildId }}\",
+              \"platform\": \"ANDROID\",
+              \"error\": \"$ERROR_MSG\"
+            }" || echo "⚠️ Failed to notify backend of build failure"

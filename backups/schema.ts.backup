@@ -57,46 +57,6 @@ export type App = typeof apps.$inferSelect;
 export type InsertApp = typeof apps.$inferInsert;
 
 /**
- * Build job queue - FIXED VERSION
- * Tracks all build jobs with status, progress, and artifact URLs
- */
-export const builds = mysqlTable("builds", {
-  id: varchar("id", { length: 64 }).primaryKey(), // build_<timestamp>_<random>
-  appId: int("appId").notNull(),
-  userId: int("userId").notNull(),
-  
-  // Platform
-  platform: mysqlEnum("platform", ["IOS", "ANDROID", "BOTH"]).notNull(),
-  
-  // Status tracking
-  status: mysqlEnum("status", ["PENDING", "RUNNING", "BUILDING", "COMPLETED", "FAILED"]).default("PENDING").notNull(),
-  progress: int("progress").default(0).notNull(), // 0-100
-  
-  // Retry logic
-  retries: int("retries").default(0).notNull(),
-  maxRetries: int("maxRetries").default(1).notNull(),
-  
-  // GitHub Actions tracking
-  githubRunId: varchar("githubRunId", { length: 255 }), // For Android build
-  githubRunIdIos: varchar("githubRunIdIos", { length: 255 }), // For iOS build
-  
-  // Build artifacts
-  androidUrl: text("androidUrl"),
-  iosUrl: text("iosUrl"),
-  
-  // Error tracking
-  error: text("error"),
-  
-  // Timestamps
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  completedAt: timestamp("completedAt"),
-});
-
-export type Build = typeof builds.$inferSelect;
-export type InsertBuild = typeof builds.$inferInsert;
-
-/**
  * Subscription records
  */
 export const subscriptions = mysqlTable("subscriptions", {
