@@ -218,3 +218,47 @@
 - [x] Test /healthz and /readyz endpoints
 - [ ] Test Sentry error capture (backend + frontend) - Requires SENTRY_DSN
 - [ ] Verify sourcemaps upload and stack traces - Requires SENTRY_AUTH_TOKEN
+
+## Phase A: Sentry Account + Alerts Setup
+
+### Documentation Created
+- [x] SENTRY_SETUP_CHECKLIST.md - Complete UI walkthrough
+- [x] SENTRY_GATES.md - Gate system with success criteria
+- [x] scripts/test-sentry.mjs - Automated verification script
+
+### Sentry Project Creation (User Action Required)
+- [ ] Create Sentry account at sentry.io
+- [ ] Create Frontend project (Platform: React)
+- [ ] Create Backend project (Platform: Node.js)
+- [ ] Copy DSN for both projects
+
+### Environment Variables Configuration (User Action Required)
+- [ ] Add SENTRY_DSN to backend env
+- [ ] Add VITE_SENTRY_DSN to frontend env
+- [ ] Add SENTRY_AUTH_TOKEN for CI/sourcemaps
+- [ ] Configure SENTRY_ENVIRONMENT (production/staging)
+- [ ] Configure SENTRY_RELEASE (prod-ready-1.1)
+
+### Alert Rules Setup (User Action Required)
+- [ ] Backend: Error spike alert (≥5 events / 5 min)
+- [ ] Backend: New issue alert (immediate)
+- [ ] Backend: 5xx regression alert
+- [ ] Frontend: Error rate alert (>1% sessions)
+- [ ] Frontend: New errors after release
+- [ ] Configure Slack/Email notification channel
+
+### Verification & Testing (User Action Required)
+- [ ] Create intentional backend error
+- [ ] Verify error appears in Sentry (<60s)
+- [ ] Verify stacktrace is not minified
+- [ ] Verify no PII in error event (email/JWT/cookies)
+- [ ] Create intentional frontend error
+- [ ] Verify frontend error in Sentry
+- [ ] Test alert notification delivery
+
+### Gates (User Verification Required)
+- [ ] Both projects created and DSN configured
+- [ ] Errors captured successfully (backend + frontend)
+- [ ] Stacktraces readable (sourcemaps working)
+- [ ] PII scrubbing verified
+- [ ] Alerts firing correctly
