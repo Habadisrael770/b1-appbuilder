@@ -191,3 +191,30 @@
 - [ ] Fix StepEightEnhanced.tsx line 376 - 'appName' possibly undefined
 - [ ] Fix Convert.tsx line 35 - Remove 'jobId' property reference
 - [ ] Fix Convert.tsx line 51 - Remove 'jobId' from StepEightEnhanced props
+
+## Week 1-2: Observability Foundation (Production Roadmap)
+
+### Backend Observability
+- [x] Install Sentry + Pino dependencies
+- [x] Create server/observability/sentry.ts (PII scrubbing)
+- [x] Create server/observability/logger.ts (structured JSON logs)
+- [x] Create server/middleware/requestId.ts (request ID tracking)
+- [x] Create server/middleware/httpLogger.ts (HTTP request logging)
+
+### Health Endpoints
+- [x] Create server/routes/health.ts (/healthz + /readyz)
+- [x] Implement DB readiness check with Drizzle
+
+### Frontend Observability
+- [x] Install @sentry/react + @sentry/vite-plugin
+- [x] Create client/src/observability/sentry.ts
+- [x] Update vite.config.ts with Sentry plugin
+- [x] Enable sourcemaps in build
+
+### Integration
+- [x] Integrate observability into server/_core/index.ts
+- [x] Configure middleware order (RequestID → Logging → Health)
+- [x] Add health endpoints to Express routes
+- [x] Test /healthz and /readyz endpoints
+- [ ] Test Sentry error capture (backend + frontend) - Requires SENTRY_DSN
+- [ ] Verify sourcemaps upload and stack traces - Requires SENTRY_AUTH_TOKEN

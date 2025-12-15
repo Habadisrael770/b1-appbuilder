@@ -5,9 +5,27 @@ import fs from "node:fs";
 import path from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+
+// Add Sentry plugin only if auth token is available (CI/production builds)
+if (process.env.SENTRY_AUTH_TOKEN) {
+  plugins.push(
+    sentryVitePlugin({
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      release: {
+        name: process.env.SENTRY_RELEASE || process.env.GIT_SHA || "dev",
+      },
+      sourcemaps: {
+        assets: ["./dist/public/**"],
+      },
+    })
+  );
+}
 
 export default defineConfig({
   plugins,
@@ -24,6 +42,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: true, // Required for Sentry sourcemaps
   },
   server: {
     host: true,

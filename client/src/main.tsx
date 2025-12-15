@@ -10,6 +10,10 @@ import "./index.css";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContainer } from "./components/notifications/ToastContainer";
+import { initClientSentry } from "./observability/sentry";
+
+// Initialize Sentry before anything else
+initClientSentry();
 
 const queryClient = new QueryClient();
 
