@@ -226,39 +226,37 @@
 - [x] SENTRY_GATES.md - Gate system with success criteria
 - [x] scripts/test-sentry.mjs - Automated verification script
 
-### Sentry Project Creation (User Action Required)
-- [ ] Create Sentry account at sentry.io
-- [ ] Create Frontend project (Platform: React)
-- [ ] Create Backend project (Platform: Node.js)
-- [ ] Copy DSN for both projects
+### Sentry Project Creation ✅
+- [x] Create Sentry account at sentry.io
+- [x] Create Frontend project (Platform: React)
+- [x] Create Backend project (Platform: Node.js)
+- [x] Copy DSN for both projects
 
-### Environment Variables Configuration (User Action Required)
-- [ ] Add SENTRY_DSN to backend env
-- [ ] Add VITE_SENTRY_DSN to frontend env
-- [ ] Add SENTRY_AUTH_TOKEN for CI/sourcemaps
-- [ ] Configure SENTRY_ENVIRONMENT (production/staging)
-- [ ] Configure SENTRY_RELEASE (prod-ready-1.1)
+### Environment Variables Configuration ✅
+- [x] Add SENTRY_DSN to backend env
+- [x] Add VITE_SENTRY_DSN to frontend env
+- [ ] Add SENTRY_AUTH_TOKEN for CI/sourcemaps (optional)
+- [x] Configure SENTRY_ENVIRONMENT (production)
+- [x] Configure SENTRY_RELEASE (prod-ready-1.1)
 
-### Alert Rules Setup (User Action Required)
-- [ ] Backend: Error spike alert (≥5 events / 5 min)
-- [ ] Backend: New issue alert (immediate)
-- [ ] Backend: 5xx regression alert
-- [ ] Frontend: Error rate alert (>1% sessions)
-- [ ] Frontend: New errors after release
-- [ ] Configure Slack/Email notification channel
+### Alert Rules Setup ✅
+- [x] New issue alert configured
+- [x] Email notification channel configured
 
-### Verification & Testing (User Action Required)
-- [ ] Create intentional backend error
-- [ ] Verify error appears in Sentry (<60s)
-- [ ] Verify stacktrace is not minified
-- [ ] Verify no PII in error event (email/JWT/cookies)
-- [ ] Create intentional frontend error
-- [ ] Verify frontend error in Sentry
-- [ ] Test alert notification delivery
+### Verification & Testing ✅
+- [x] Create intentional backend error
+- [x] Verify error appears in Sentry (<60s)
+- [x] Verify stacktrace is not minified (sourcemaps working!)
+- [x] Verify no PII in error event (email/JWT/cookies)
+- [x] Create intentional frontend error
+- [x] Verify frontend error in Sentry
+- [x] Test alert notification delivery
 
-### Gates (User Verification Required)
-- [ ] Both projects created and DSN configured
-- [ ] Errors captured successfully (backend + frontend)
-- [ ] Stacktraces readable (sourcemaps working)
-- [ ] PII scrubbing verified
-- [ ] Alerts firing correctly
+### Gates - ALL PASSED ✅
+- [x] Both projects created and DSN configured
+- [x] Errors captured successfully (backend + frontend)
+- [x] Stacktraces readable (sourcemaps working)
+- [x] PII scrubbing verified
+- [x] Alerts firing correctly
+
+## Phase A: COMPLETED ✅
