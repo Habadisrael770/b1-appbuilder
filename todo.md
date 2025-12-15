@@ -324,3 +324,41 @@ Manus rollback only restores checkpointed changes. Uncommitted changes require m
 - [x] Update ROLLBACK_PROCEDURES.md with checkpoint limitation
 - [x] Add manual recovery procedure to documentation (Method 3)
 - [ ] Create checkpoint discipline policy
+
+## Phase B½: COMPLETED ✅
+
+## Phase C.0: Backup & Restore Strategy
+
+### Purpose
+Establish DB backup/restore as the safety net when rollback fails.
+
+### Backup Implementation
+- [x] Investigate DB connection and type (MySQL/TiDB)
+- [x] Create backup script (scripts/db-backup.mjs)
+- [x] Execute first backup and verify file created
+- [x] Document backup location and naming convention
+
+### Restore Implementation
+- [x] Create restore script (scripts/db-restore.mjs)
+- [x] Test restore to staging environment
+- [x] Measure restore RTO (24.6 seconds)
+- [x] Verify /readyz green after restore
+
+### Documentation
+- [x] Define RPO (≤24 hours)
+- [x] Define RTO (≤60 minutes, measured ~60 seconds)
+- [x] Create BACKUP_RESTORE_PROCEDURES.md
+- [x] Document backup schedule recommendation
+
+### Fire Drill
+- [x] Execute DB restore fire drill
+- [x] Measure end-to-end RTO (~60 seconds)
+- [x] Document findings (BACKUP_RESTORE_REPORT_2025-12-15.md)
+
+### Success Criteria
+- [x] Backup script working
+- [x] Restore script working
+- [x] RTO measured and documented
+- [x] /readyz green after restore
+
+## Phase C.0: COMPLETED ✅

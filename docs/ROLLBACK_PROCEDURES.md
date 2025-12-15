@@ -146,10 +146,24 @@ Issue Detected in Production
                               (30 min)
 ```
 
+## Database Restore as Safety Net
+
+When application rollback is insufficient (e.g., data corruption, accidental deletion), use database restore:
+
+```bash
+cd /home/ubuntu/b1-appbuilder
+node scripts/db-restore.mjs backups/staging/<backup_file>.sql.gz
+```
+
+See [BACKUP_RESTORE_PROCEDURES.md](./BACKUP_RESTORE_PROCEDURES.md) for complete instructions.
+
+> **Rule:** If rollback fails and data is affected, DB restore is the next step.
+
 ## Related Documentation
 
 For additional context on deployment and monitoring, refer to:
 
+- [Backup & Restore Procedures](./BACKUP_RESTORE_PROCEDURES.md) - Database backup and restore
 - [Staging Workflow](./STAGING_WORKFLOW.md) - Pre-production testing process
 - [Phase B Checklist](./CHECKLIST_B_STAGING.md) - Deployment verification checklist
 - [Sentry Setup](./SENTRY_SETUP_CHECKLIST.md) - Error monitoring configuration
