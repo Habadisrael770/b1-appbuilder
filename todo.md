@@ -381,3 +381,23 @@ Define mandatory checkpoint requirements to ensure rollback capability.
 - [x] Referenced in STAGING_WORKFLOW.md
 
 ## Checkpoint Discipline Policy: COMPLETED ✅
+
+## Automated Daily Backup
+
+### Purpose
+Automate daily database backups to eliminate human error risk.
+
+### Implementation
+- [x] Create cron-compatible backup script (automated-backup.mjs)
+- [x] Add retention policy (keep last 7 days)
+- [x] Add checksum verification
+- [x] Implement failure alerting (notifyOwner API)
+- [x] Test automated execution (34.3s, 2.42 KB)
+
+### Success Criteria
+- [x] Cron job ready (crontab example in docs)
+- [x] Old backups auto-deleted after retention period
+- [x] Alert sent on backup failure
+- [x] Documentation updated (AUTOMATED_BACKUP.md)
+
+## Automated Daily Backup: COMPLETED ✅
