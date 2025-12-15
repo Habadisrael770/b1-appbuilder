@@ -362,3 +362,22 @@ Establish DB backup/restore as the safety net when rollback fails.
 - [x] /readyz green after restore
 
 ## Phase C.0: COMPLETED ✅
+
+## Checkpoint Discipline Policy
+
+### Purpose
+Define mandatory checkpoint requirements to ensure rollback capability.
+
+### Document Requirements
+- [x] Define when checkpoint is mandatory
+- [x] Define who is responsible (Role)
+- [x] Define gate: no Publish without checkpoint
+- [x] Define exceptions and approval process
+- [x] Keep document to one page
+
+### Success Criteria
+- [x] Policy document created
+- [x] Referenced in ROLLBACK_PROCEDURES.md
+- [x] Referenced in STAGING_WORKFLOW.md
+
+## Checkpoint Discipline Policy: COMPLETED ✅

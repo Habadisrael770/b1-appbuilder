@@ -122,6 +122,8 @@ curl https://[production-url]/readyz
 
 ## Related Documentation
 
+- [Checkpoint Discipline Policy](./CHECKPOINT_DISCIPLINE_POLICY.md) - Mandatory checkpoint requirements
 - [Rollback Procedures](./ROLLBACK_PROCEDURES.md) - How to recover from failed deployments
+- [Backup & Restore Procedures](./BACKUP_RESTORE_PROCEDURES.md) - Database recovery
 - [Phase B Checklist](./CHECKLIST_B_STAGING.md) - Pre-publish verification checklist
 - [Sentry Setup](./SENTRY_SETUP_CHECKLIST.md) - Error monitoring configuration

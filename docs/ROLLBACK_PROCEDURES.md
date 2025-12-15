@@ -163,6 +163,7 @@ See [BACKUP_RESTORE_PROCEDURES.md](./BACKUP_RESTORE_PROCEDURES.md) for complete 
 
 For additional context on deployment and monitoring, refer to:
 
+- [Checkpoint Discipline Policy](./CHECKPOINT_DISCIPLINE_POLICY.md) - Mandatory checkpoint requirements
 - [Backup & Restore Procedures](./BACKUP_RESTORE_PROCEDURES.md) - Database backup and restore
 - [Staging Workflow](./STAGING_WORKFLOW.md) - Pre-production testing process
 - [Phase B Checklist](./CHECKLIST_B_STAGING.md) - Deployment verification checklist
