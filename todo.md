@@ -401,3 +401,23 @@ Automate daily database backups to eliminate human error risk.
 - [x] Documentation updated (AUTOMATED_BACKUP.md)
 
 ## Automated Daily Backup: COMPLETED ✅
+
+## Fire Drill Quarterly Program
+
+### Purpose
+Establish recurring fire drills to maintain team readiness and validate recovery procedures.
+
+### Deliverables
+- [x] Fire Drill Quarterly Template (FIRE_DRILL_QUARTERLY_TEMPLATE.md)
+- [x] DB Restore Drill Checklist (DB_RESTORE_DRILL_CHECKLIST.md)
+- [x] Calendar cadence (FIRE_DRILL_CALENDAR.md)
+- [x] Escalation rules (included in calendar doc)
+- [x] First drill date scheduled (2025-02-17)
+
+### Success Criteria
+- [x] Template document created
+- [x] Checklist created
+- [x] Q1 2025 drill date set (2025-02-17)
+- [ ] Owner assigned (TBD by user)
+
+## Fire Drill Quarterly Program: COMPLETED ✅
