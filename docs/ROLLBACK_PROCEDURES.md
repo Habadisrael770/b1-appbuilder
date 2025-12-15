@@ -23,6 +23,9 @@ The general rule is to rollback for any issue that significantly impacts user ex
 
 The Manus platform provides built-in rollback functionality through checkpoints. This is the fastest and safest method.
 
+> **⚠️ CRITICAL LIMITATION (Discovered in Fire Drill 2025-12-15):**
+> Manus rollback **only restores changes that were committed to a checkpoint**. If code was modified after the last checkpoint without creating a new checkpoint, rollback will have no effect on those changes. In such cases, use Method 3 (Manual File Recovery) below.
+
 **Step 1:** Open the Manus Management UI and navigate to the Dashboard panel.
 
 **Step 2:** Locate the checkpoint list showing previous versions. Each checkpoint displays the version ID, timestamp, and description.
@@ -57,6 +60,27 @@ git reset --hard <commit-hash>
 **Step 4:** Create a new checkpoint with the reverted code.
 
 **Step 5:** Publish the reverted version to production.
+
+### Method 3: Manual File Recovery
+
+Use this method when rollback fails because changes were not checkpointed.
+
+**When to use:** Manus rollback reports "no changes detected" but the system is still broken.
+
+**Step 1:** Identify the broken file(s) by checking error logs or health endpoint responses.
+
+**Step 2:** Locate the last known good version of the file. Options include:
+- Copy from a colleague's working environment
+- Retrieve from git history: `git show <commit>:<filepath>`
+- Manually rewrite the file based on documentation
+
+**Step 3:** Replace the broken file with the working version.
+
+**Step 4:** Wait for the dev server to reload (typically 2-3 seconds).
+
+**Step 5:** Verify recovery by checking health endpoints.
+
+**Step 6:** Create a checkpoint immediately after recovery to prevent future rollback issues.
 
 ## Post-Rollback Checklist
 

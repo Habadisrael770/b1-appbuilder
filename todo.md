@@ -297,3 +297,30 @@
 - [x] Rollback procedures documented
 
 ## Phase B: COMPLETED ✅
+
+## Phase B½: Fire Drill (Staging Execution)
+
+### Purpose
+Prove that rollback procedures work in practice, not just on paper.
+
+### Fire Drill Steps
+- [x] Step 1: Verify staging (Preview URL) is accessible
+- [x] Step 2: Confirm health endpoints green (/healthz, /readyz)
+- [x] Step 3: Create controlled break (intentional failure)
+- [x] Step 4: Execute rollback per ROLLBACK_PROCEDURES.md
+- [x] Step 5: Measure RTO (89 seconds total)
+- [x] Step 6: Document findings (FIRE_DRILL_REPORT_2025-12-15.md)
+
+### Success Criteria
+- [x] Rollback completed (with manual intervention)
+- [x] RTO measured: 89 seconds
+- [x] Gap found: Rollback only works for checkpointed changes
+- [x] Fire Drill report created
+
+### Critical Finding
+Manus rollback only restores checkpointed changes. Uncommitted changes require manual recovery.
+
+### Action Items from Fire Drill
+- [x] Update ROLLBACK_PROCEDURES.md with checkpoint limitation
+- [x] Add manual recovery procedure to documentation (Method 3)
+- [ ] Create checkpoint discipline policy
