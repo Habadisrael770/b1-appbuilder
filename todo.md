@@ -260,3 +260,40 @@
 - [x] Alerts firing correctly
 
 ## Phase A: COMPLETED ✅
+
+## Phase B: Staging Environment (Production Roadmap)
+
+### Staging Domain Setup
+- [x] Configure staging domain in Manus hosting (using Preview URL as staging)
+- [x] Verify staging URL is accessible
+- [x] Document staging workflow (STAGING_WORKFLOW.md)
+
+### CI/CD Workflow (Manus Hosting Approach)
+- [x] Document manual publish workflow via Manus UI
+- [x] Create pre-publish-check.mjs script for verification
+- [x] Document checkpoint-based deployment process
+
+### Environment Separation
+- [x] Document environment variable strategy (STAGING_WORKFLOW.md)
+- [x] SENTRY_ENVIRONMENT configured for production
+- [x] Document dev/staging/production differences
+
+### Health Gates
+- [x] /healthz endpoint implemented and working
+- [x] /readyz endpoint implemented with DB check
+- [x] pre-publish-check.mjs includes health verification
+- [x] Timeout and retry logic in health check script
+
+### Rollback Procedures
+- [x] Document manual rollback steps (ROLLBACK_PROCEDURES.md)
+- [x] Document Manus UI rollback method
+- [x] Document rollback decision tree
+- [x] Document post-rollback verification checklist
+
+### Verification
+- [x] Staging (Preview URL) accessible and working
+- [x] Health endpoints verified (/healthz, /readyz)
+- [x] Sentry capturing errors (Phase A verified)
+- [x] Rollback procedures documented
+
+## Phase B: COMPLETED ✅
