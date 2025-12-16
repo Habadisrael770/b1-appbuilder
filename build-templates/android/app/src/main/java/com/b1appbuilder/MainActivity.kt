@@ -77,8 +77,8 @@ class MainActivity : AppCompatActivity() {
             // Cache
             cacheMode = WebSettings.LOAD_DEFAULT
             
-            // User agent
-            userAgentString = buildCustomUserAgent()
+            // User agent - set after initial settings
+            // userAgentString will be set after this block
             
             // File access
             allowFileAccess = false
@@ -94,6 +94,9 @@ class MainActivity : AppCompatActivity() {
             // Default zoom
             defaultZoom = WebSettings.ZoomDensity.MEDIUM
         }
+        
+        // Set custom user agent after initial settings
+        webView.settings.userAgentString = buildCustomUserAgent()
         
         // WebViewClient
         webView.webViewClient = CustomWebViewClient(this)
@@ -147,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
     
     private fun buildCustomUserAgent(): String {
-        val defaultUserAgent = WebSettings(this).userAgentString
+        val defaultUserAgent = webView.settings.userAgentString
         return "$defaultUserAgent B1AppBuilder/1.0.0"
     }
     
