@@ -442,3 +442,24 @@ Store backups in separate S3 location for disaster recovery protection.
 - [x] Documentation updated (OFFSITE_BACKUP.md)
 
 ## Off-site Backup: COMPLETED ✅
+
+## Documentation Index
+
+### Purpose
+Create central index (docs/README.md) for quick access to all operational documents during incidents.
+
+### Deliverables
+- [x] Inventory all existing docs (13 documents)
+- [x] Create docs/README.md with organized sections
+- [x] Include Quick Start for incidents
+- [x] Include Deploy/Rollback section
+- [x] Include Backup/Restore section
+- [x] Include Fire Drill section
+- [x] Include Contacts/Owners section
+
+### Success Criteria
+- [x] All 13 documents linked
+- [x] Organized by use case
+- [x] Quick Start at top
+
+## Documentation Index: COMPLETED ✅
