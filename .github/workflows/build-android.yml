@@ -244,11 +244,18 @@ jobs:
             KEY_PASSWORD="android123"
           fi
           
+          # Find Android SDK build-tools
+          BUILD_TOOLS_DIR="$ANDROID_HOME/build-tools/33.0.0"
+          if [ ! -d "$BUILD_TOOLS_DIR" ]; then
+            BUILD_TOOLS_DIR=$(find $ANDROID_HOME/build-tools -maxdepth 1 -type d | sort -V | tail -1)
+          fi
+          echo "Using build-tools: $BUILD_TOOLS_DIR"
+          
           # Zipalign the APK first
-          zipalign -v 4 "$APK_PATH" "$SIGNED_APK_PATH"
+          "$BUILD_TOOLS_DIR/zipalign" -v 4 "$APK_PATH" "$SIGNED_APK_PATH"
           
           # Sign APK using apksigner (recommended for Android)
-          apksigner sign --ks release.keystore \
+          "$BUILD_TOOLS_DIR/apksigner" sign --ks release.keystore \
             --ks-pass "pass:${KEYSTORE_PASSWORD:-android123}" \
             --key-pass "pass:${KEY_PASSWORD:-android123}" \
             --ks-key-alias "${KEY_ALIAS:-release-key}" \
@@ -257,7 +264,7 @@ jobs:
           echo "✅ APK signed successfully"
           
           # Verify signature
-          apksigner verify -v "$SIGNED_APK_PATH"
+          "$BUILD_TOOLS_DIR/apksigner" verify -v "$SIGNED_APK_PATH"
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
