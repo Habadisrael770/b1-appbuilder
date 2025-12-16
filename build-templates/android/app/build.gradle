@@ -7,15 +7,6 @@ android {
     namespace "com.b1appbuilder"
     compileSdk 34
 
-    signingConfigs {
-        release {
-            storeFile file("keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: "android"
-            keyAlias "release-key"
-            keyPassword System.getenv("KEY_PASSWORD") ?: "android"
-        }
-    }
-
     defaultConfig {
         applicationId "com.b1appbuilder"
         minSdk 24
@@ -28,10 +19,9 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            // Signing will be done by GitHub Actions after build
         }
         debug {
             minifyEnabled false
