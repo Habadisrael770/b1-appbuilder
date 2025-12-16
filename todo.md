@@ -486,26 +486,3 @@ Automate daily backup and off-site upload without human intervention.
 - [x] Alert on failure works
 
 ## Cron Setup: COMPLETED ✅ (pending overnight verification)
-
-
-## Android APK Build Pipeline - COMPLETED ✅
-
-### Build Issues Fixed (2025-12-16)
-- [x] Fixed Gradle wrapper for Java 17 compatibility
-- [x] Added missing Android resource files (launcher icons for all densities)
-- [x] Added backup_rules.xml, data_extraction_rules.xml, file_paths.xml
-- [x] Fixed WebSettings constructor error in MainActivity.kt
-- [x] Removed signingConfig from build.gradle (signing done post-build by workflow)
-- [x] Updated workflow to use zipalign + apksigner with full SDK paths
-- [x] First successful APK build completed (Run #20268320556)
-
-### Build Verification
-- APK Size: 5.1 MB
-- Build Time: ~3 minutes
-- Artifact: Test App 7-android-test-007/app-release.apk
-- GitHub Actions Run: https://github.com/Habadisrael770/b1-appbuilder/actions/runs/20268320556
-
-### PR Created
-- PR #1: First Successful APK Build - Android Build Pipeline Complete
-- Branch: fix/android-build-gradle → main
-- Status: Awaiting review/merge
