@@ -421,3 +421,24 @@ Establish recurring fire drills to maintain team readiness and validate recovery
 - [ ] Owner assigned (TBD by user)
 
 ## Fire Drill Quarterly Program: COMPLETED ✅
+
+## Off-site Backup
+
+### Purpose
+Store backups in separate S3 location for disaster recovery protection.
+
+### Implementation
+- [x] Investigate S3 storage access (storagePut helper)
+- [x] Create off-site upload script (offsite-backup.mjs)
+- [x] Add encryption (TLS + S3 server-side)
+- [x] Add retention policy (7 days)
+- [x] Add failure alerting (notifyOwner API)
+- [x] Test upload to S3 (~2 seconds)
+- [x] Verify restore from off-site backup (26.5 seconds)
+
+### Success Criteria
+- [x] Backup uploaded to S3 successfully
+- [x] Restore from S3 backup verified
+- [x] Documentation updated (OFFSITE_BACKUP.md)
+
+## Off-site Backup: COMPLETED ✅
