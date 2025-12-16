@@ -463,3 +463,26 @@ Create central index (docs/README.md) for quick access to all operational docume
 - [x] Quick Start at top
 
 ## Documentation Index: COMPLETED ✅
+
+## Cron Setup
+
+### Purpose
+Automate daily backup and off-site upload without human intervention.
+
+### Schedule
+- 02:00 AM - Local backup (automated-backup.mjs)
+- 02:30 AM - Off-site upload (offsite-backup.mjs)
+
+### Implementation
+- [x] Create cron wrapper script with logging (cron-backup.sh)
+- [x] Configure Manus Schedule (staging) - 02:00 local, 02:30 off-site
+- [x] Create PRODUCTION_CRON_SETUP.md for production deployment
+- [x] Verify scripts work manually
+
+### Success Criteria
+- [x] Manus Schedule configured for staging
+- [ ] Two consecutive runs pass (pending overnight)
+- [x] Logs written correctly
+- [x] Alert on failure works
+
+## Cron Setup: COMPLETED ✅ (pending overnight verification)

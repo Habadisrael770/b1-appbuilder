@@ -39,6 +39,7 @@ These documents cover data protection, including local backups, off-site storage
 | [Backup & Restore Procedures](./BACKUP_RESTORE_PROCEDURES.md) | Manual backup/restore commands | Data recovery |
 | [Automated Daily Backup](./AUTOMATED_BACKUP.md) | Cron-based backup setup | Setting up automation |
 | [Off-site Backup](./OFFSITE_BACKUP.md) | S3 backup for disaster recovery | When local unavailable |
+| [Production Cron Setup](./PRODUCTION_CRON_SETUP.md) | Cron configuration for production | Production deployment |
 
 ### Key Commands
 
