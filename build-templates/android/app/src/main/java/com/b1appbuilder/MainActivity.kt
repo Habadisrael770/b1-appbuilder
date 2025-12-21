@@ -13,10 +13,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.webkit.WebSettingsCompat
-import androidx.webkit.WebViewFeature
+// WebView compat imports removed - using system defaults
 import com.google.android.material.snackbar.Snackbar
-import java.io.IOException
+// IOException import removed - not needed
 
 /**
  * MainActivity - Main activity hosting the WebView for website loading
@@ -35,9 +34,9 @@ class MainActivity : AppCompatActivity() {
     private val PERMISSION_REQUEST_CODE = 100
     private val FILE_CHOOSER_REQUEST_CODE = 101
     
-    // Configuration
-    private val websiteUrl by lazy { loadWebsiteUrl() }
-    private val appConfig by lazy { loadAppConfig() }
+    // Configuration - URL is replaced by build script
+    private val websiteUrl = "https://example.com"
+    private val appName = "B1 App"
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,8 +90,7 @@ class MainActivity : AppCompatActivity() {
             builtInZoomControls = true
             displayZoomControls = false
             
-            // Default zoom
-            defaultZoom = WebSettings.ZoomDensity.MEDIUM
+            // Default zoom - removed deprecated ZoomDensity
         }
         
         // Set custom user agent after initial settings
@@ -107,10 +105,7 @@ class MainActivity : AppCompatActivity() {
         // JavaScript interface for native communication
         webView.addJavascriptInterface(JavaScriptInterface(this), "Android")
         
-        // Enable dark mode if supported
-        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-            WebSettingsCompat.setForceDark(webView.settings, WebSettingsCompat.FORCE_DARK_AUTO)
-        }
+        // Dark mode handled by system settings
     }
     
     private fun loadWebsite() {
@@ -126,28 +121,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    private fun loadWebsiteUrl(): String {
-        return try {
-            val config = loadAppConfig()
-            config["websiteUrl"] as? String ?: "https://example.com"
-        } catch (e: Exception) {
-            "https://example.com"
-        }
-    }
-    
-    private fun loadAppConfig(): Map<String, Any> {
-        return try {
-            val json = assets.open("config.json").bufferedReader().use { it.readText() }
-            // Parse JSON (using simple approach, can use Gson for production)
-            mapOf(
-                "websiteUrl" to "https://example.com",
-                "appName" to "B1 App",
-                "primaryColor" to "#007AFF"
-            )
-        } catch (e: IOException) {
-            mapOf()
-        }
-    }
+    // URL and app name are set directly - replaced by build script
     
     private fun buildCustomUserAgent(): String {
         val defaultUserAgent = webView.settings.userAgentString
