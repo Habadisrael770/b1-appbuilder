@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Convert from "./pages/Convert";
 import Dashboard from "./pages/Dashboard";
+import Converter from "./pages/Converter";
+import Install from "./pages/Install";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,6 +21,8 @@ function Router() {
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
       <Route path={"/convert"} component={Convert} />
+      <Route path={"/converter"} component={Converter} />
+      <Route path={"/install"} component={Install} />
       <Route path={"/dashboard"} component={Dashboard} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
