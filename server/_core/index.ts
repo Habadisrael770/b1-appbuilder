@@ -69,6 +69,18 @@ async function startServer() {
   // HTTP Builds API endpoints
   registerBuildHttpEndpoints(app);
   
+  /* ---------- LEGACY /convert REDIRECT (HARD SERVER-SIDE) ---------- */
+  // Kills legacy /convert BEFORE SPA / JS loads.
+  // Works with: Mobile WebView, No-JS, Aggressive cache, Bots
+  app.get("/convert", (req, res) => {
+    const legacyUrl = req.query.url;
+    if (typeof legacyUrl === "string" && legacyUrl.length > 0) {
+      res.redirect(308, `/converter?url=${encodeURIComponent(legacyUrl)}`);
+    } else {
+      res.redirect(308, "/converter");
+    }
+  });
+  
   // tRPC API
   app.use(
     "/api/trpc",
