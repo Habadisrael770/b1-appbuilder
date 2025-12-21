@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO apps (id, userId, appName, websiteUrl, status, createdAt, updatedAt) VALUES (1, 1, 'Test App', 'https://example.com', 'COMPLETED', NOW(), NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user is9fdZ36rXae7oW.root --database 5Wu4NjKS7Bk8ABMFTWbFQP --execute INSERT INTO apps (id, userId, appName, websiteUrl, status, createdAt, updatedAt) VALUES (1, 1, 'Test App', 'https://example.com', 'COMPLETED', NOW(), NOW());",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 1543
+}

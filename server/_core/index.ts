@@ -14,6 +14,7 @@ import * as Sentry from "@sentry/node";
 import { attachRequestId } from "../middleware/requestId";
 import { httpLogger } from "../middleware/httpLogger";
 import { healthz, readyz } from "../routes/health";
+import { registerBuildHttpEndpoints } from "../http/builds";
 
 // Initialize Sentry before anything else
 initSentry();
@@ -64,6 +65,9 @@ async function startServer() {
   registerOAuthRoutes(app);
   // GitHub webhook for build notifications
   app.use(githubWebhookRouter);
+  
+  // HTTP Builds API endpoints
+  registerBuildHttpEndpoints(app);
   
   // tRPC API
   app.use(
