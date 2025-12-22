@@ -1,0 +1,84 @@
+{
+    "websiteLink": "https://example.com",
+    "testLink": "https://example.com",
+    "bundleId": "com.b1appbuilder",
+    "allowDoubleBack": true,
+    "appName": "B1 App",
+    "applicationId": "com.b1appbuilder",
+    "internalExternalLinks": [
+        {
+            "type": "EXTERNAL",
+            "label": "Non-web links",
+            "regex": "^(?!https?://).*",
+            "pageType": "CUSTOM"
+        },
+        {
+            "type": "EXTERNAL",
+            "label": "Facebook",
+            "regex": "https?://([-\\w]+\\.)*facebook\\.com.*",
+            "pageType": "CUSTOM"
+        },
+        {
+            "type": "EXTERNAL",
+            "label": "Twitter",
+            "regex": "https?://([-\\w]+\\.)*twitter\\.com/.*",
+            "pageType": "CUSTOM"
+        },
+        {
+            "type": "EXTERNAL",
+            "label": "Instagram",
+            "regex": "https?://([-\\w]+\\.)*instagram\\.com/.*",
+            "pageType": "CUSTOM"
+        },
+        {
+            "type": "EXTERNAL",
+            "label": "WhatsApp",
+            "regex": "https?://([-\\w]+\\.)*whatsapp\\.com/.*",
+            "pageType": "CUSTOM"
+        },
+        {
+            "type": "INTERNAL",
+            "label": "All Other Links",
+            "regex": ".*",
+            "pageType": "ALL_PAGES"
+        }
+    ],
+    "noInternet": true,
+    "noInternetData": {
+        "pages": [
+            {
+                "topMarginPercent": 14,
+                "elements": [
+                    {
+                        "fontSize": 32,
+                        "type": "text",
+                        "value": "אופס!",
+                        "textColor": "#363942",
+                        "fontWeight": 700
+                    },
+                    {
+                        "fontSize": 14,
+                        "type": "text",
+                        "value": "אין חיבור לאינטרנט",
+                        "textColor": "#363942",
+                        "fontWeight": 400
+                    }
+                ]
+            }
+        ],
+        "bgColor": "#FFFFFF",
+        "actionButtons": [
+            {
+                "btnBgColor": "#00A86B",
+                "borderColor": "#00A86B",
+                "borderWidth": 4,
+                "text": "נסה שוב",
+                "roundedCornerPercent": 8,
+                "textColor": "#ffffff",
+                "url": "#"
+            }
+        ]
+    },
+    "backgroundColor": "#00A86B",
+    "isPaid": false
+}
