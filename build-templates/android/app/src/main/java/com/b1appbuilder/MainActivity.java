@@ -15,27 +15,21 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.json.JSONObject;
-
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
 /**
  * MainActivity - WebToNative-style WebView wrapper
- * Reads configuration from assets/appConfig.json
+ * URL is replaced by build script via sed command
  */
 public class MainActivity extends Activity {
     
     private WebView webView;
-    private String websiteUrl = "https://example.com";
-    private String appName = "B1 App";
+    
+    // This URL is replaced by the build workflow using sed
+    // DO NOT change "https://example.com" - it's a placeholder for sed replacement
+    private static final String WEBSITE_URL = "https://example.com";
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Load config from appConfig.json
-        loadConfigFromAssets();
         
         // Create WebView programmatically (like WebToNative)
         webView = new WebView(this);
@@ -46,42 +40,9 @@ public class MainActivity extends Activity {
         
         // Check internet and load
         if (isNetworkAvailable()) {
-            webView.loadUrl(websiteUrl);
+            webView.loadUrl(WEBSITE_URL);
         } else {
             showNoInternetPage();
-        }
-    }
-    
-    /**
-     * Load configuration from appConfig.json (WebToNative style)
-     */
-    private void loadConfigFromAssets() {
-        try {
-            InputStream is = getAssets().open("appConfig.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            
-            String json = new String(buffer, StandardCharsets.UTF_8);
-            JSONObject config = new JSONObject(json);
-            
-            // Read website URL (testLink has priority, like WebToNative)
-            if (config.has("testLink") && !config.getString("testLink").isEmpty()) {
-                websiteUrl = config.getString("testLink");
-            } else if (config.has("websiteLink")) {
-                websiteUrl = config.getString("websiteLink");
-            }
-            
-            // Read app name
-            if (config.has("appName")) {
-                appName = config.getString("appName");
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Fallback URL if config fails
-            websiteUrl = "https://example.com";
         }
     }
     
@@ -166,6 +127,27 @@ public class MainActivity extends Activity {
                     return true;
                 }
                 
+                // Handle WhatsApp
+                if (url.startsWith("whatsapp:") || url.contains("wa.me")) {
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+                
+                // Handle intent:// URLs
+                if (url.startsWith("intent:")) {
+                    try {
+                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+                
                 // Load in WebView
                 return false;
             }
@@ -188,7 +170,7 @@ public class MainActivity extends Activity {
      */
     private boolean shouldOpenExternally(String url) {
         String[] externalDomains = {
-            "facebook.com", "fb.com",
+            "facebook.com", "fb.com", "fb.me",
             "instagram.com",
             "twitter.com", "x.com",
             "whatsapp.com", "wa.me",
@@ -196,7 +178,8 @@ public class MainActivity extends Activity {
             "youtube.com", "youtu.be",
             "maps.google.com", "goo.gl/maps",
             "play.google.com",
-            "apps.apple.com"
+            "apps.apple.com",
+            "tiktok.com"
         };
         
         String lowerUrl = url.toLowerCase();
