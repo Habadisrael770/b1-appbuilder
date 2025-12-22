@@ -18,9 +18,10 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.location" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <application
-        android:allowBackup="false"
+        android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -28,7 +29,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.B1AppBuilder"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="true"
+        android:extractNativeLibs="false"
         android:hardwareAccelerated="true"
         tools:targetApi="31">
 
@@ -36,7 +38,9 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard|navigation|uiMode"
+            android:windowSoftInputMode="adjustResize"
+            android:resizeableActivity="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask">
             <intent-filter>

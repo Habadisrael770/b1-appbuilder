@@ -9,9 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 /**
- * MainActivity - Minimal WebView wrapper
- * 
- * SIMPLIFIED VERSION - Removed all non-essential features to prevent crashes
+ * MainActivity - WebView wrapper based on WebToNative reference
  */
 class MainActivity : AppCompatActivity() {
     
@@ -29,6 +27,7 @@ class MainActivity : AppCompatActivity() {
             initializeWebView()
             loadWebsite()
         } catch (e: Exception) {
+            e.printStackTrace()
             Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -36,15 +35,40 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     private fun initializeWebView() {
         webView.settings.apply {
+            // Core settings (matching WebToNative)
             javaScriptEnabled = true
             domStorageEnabled = true
-            databaseEnabled = true
+            allowContentAccess = true
+            allowFileAccess = true
+            
+            // Cache settings
             cacheMode = WebSettings.LOAD_DEFAULT
+            databaseEnabled = true
+            
+            // Zoom settings
             builtInZoomControls = true
             displayZoomControls = false
+            setSupportZoom(true)
+            
+            // Viewport settings
             useWideViewPort = true
             loadWithOverviewMode = true
-            setSupportZoom(true)
+            
+            // JavaScript window settings
+            javaScriptCanOpenWindowsAutomatically = true
+            setSupportMultipleWindows(true)
+            
+            // Mixed content (allow HTTP in HTTPS pages)
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            
+            // Media settings
+            mediaPlaybackRequiresUserGesture = false
+        }
+        
+        // Cookie settings
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setAcceptThirdPartyCookies(webView, true)
         }
         
         webView.webViewClient = object : WebViewClient() {
@@ -56,11 +80,28 @@ class MainActivity : AppCompatActivity() {
                         false // Let WebView handle it
                     }
                     url.startsWith("tel:") -> {
-                        startActivity(Intent(Intent.ACTION_DIAL, Uri.parse(url)))
+                        try {
+                            startActivity(Intent(Intent.ACTION_DIAL, Uri.parse(url)))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                         true
                     }
                     url.startsWith("mailto:") -> {
-                        startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse(url)))
+                        try {
+                            startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse(url)))
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        true
+                    }
+                    url.startsWith("intent:") -> {
+                        try {
+                            val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+                            startActivity(intent)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                         true
                     }
                     else -> false
@@ -71,9 +112,9 @@ class MainActivity : AppCompatActivity() {
                 super.onReceivedError(view, request, error)
                 if (request.isForMainFrame) {
                     view.loadData(
-                        "<html><body style='text-align:center;padding:50px;'>" +
-                        "<h2>Error Loading Page</h2>" +
-                        "<p>Please check your internet connection.</p>" +
+                        "<html><body style='text-align:center;padding:50px;font-family:sans-serif;'>" +
+                        "<h2>Unable to Load Page</h2>" +
+                        "<p>Please check your internet connection and try again.</p>" +
                         "</body></html>",
                         "text/html",
                         "UTF-8"
@@ -82,21 +123,46 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        webView.webChromeClient = WebChromeClient()
-    }
-    
-    private fun loadWebsite() {
-        if (websiteUrl.isNotEmpty()) {
-            webView.loadUrl(websiteUrl)
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                super.onProgressChanged(view, newProgress)
+            }
         }
     }
     
+    private fun loadWebsite() {
+        if (websiteUrl.isNotEmpty() && websiteUrl != "https://example.com") {
+            webView.loadUrl(websiteUrl)
+        } else {
+            webView.loadData(
+                "<html><body style='text-align:center;padding:50px;font-family:sans-serif;'>" +
+                "<h2>B1 AppBuilder</h2>" +
+                "<p>Website URL not configured.</p>" +
+                "</body></html>",
+                "text/html",
+                "UTF-8"
+            )
+        }
+    }
+    
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        webView.onResume()
+    }
+    
+    override fun onPause() {
+        webView.onPause()
+        super.onPause()
     }
     
     override fun onDestroy() {
